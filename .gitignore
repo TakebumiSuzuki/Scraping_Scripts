@@ -8,7 +8,6 @@ __pycache__/
 *.so
 *.egg-info/
 *.egg
-*.log
 *.pot
 *.pyc
 
