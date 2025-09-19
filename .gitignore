@@ -1,0 +1,82 @@
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+*.log
+*.pot
+*.pyc
+
+# バイトコードキャッシュ
+__pycache__/
+*.pyc
+
+# ビルド/配布
+build/
+dist/
+.eggs/
+
+# 仮想環境
+.venv/
+venv/
+env/
+ENV/
+
+# pytest キャッシュ
+.cache/
+.pytest_cache/
+
+# coverage レポート
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# ======================
+# Playwright
+# ======================
+# Playwright がダウンロードするブラウザ
+# （CI/CDで自動ダウンロードされるので不要）
+.playwright/
+
+# テスト成果物
+test-results/
+playwright-report/
+*.zip
+
+# スクリーンショット・動画・トレース
+*.png
+*.jpg
+*.jpeg
+*.webm
+*.mp4
+*.trace.zip
+
+# ======================
+# OS / エディタ
+# ======================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VSCode
+.vscode/
+.history/
+
+# JetBrains (PyCharm, IntelliJ)
+.idea/
+*.iml
