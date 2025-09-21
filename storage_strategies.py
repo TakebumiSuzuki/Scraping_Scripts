@@ -1,6 +1,12 @@
 import io
 import pathlib
 from abc import ABC, abstractmethod
+class StorageError(Exception):
+    pass
+class StorageFileNotFoundError(StorageError):
+    pass
+class StoragePermissionError(StorageError):
+    pass
 
 # To use GCS, you need to install the library:
 # pip install google-cloud-storage
@@ -26,29 +32,70 @@ class StorageStrategy(ABC):
 # --- Concrete Strategy for Local Storage ---
 class LocalStorageStrategy(StorageStrategy):
     """Saves the content to a local file."""
-    def __init__(self, output_dir: str):
-        self.output_path = pathlib.Path(output_dir)
+    #　def __init__(self, input_dir: str, output_dir: str):
+    def __init__(self, output_path: pathlib.Path):
+        self.output_path = output_path
 
     def save(self, string_io: io.StringIO, filename: str):
-        full_path = self.output_path / filename
-        print(f"Using LocalStorageStrategy to save to: '{full_path}'")
+        try:
+            full_path = self.output_path / filename
+            print(f"Using LocalStorageStrategy to save to: '{full_path}'")
 
-        full_path.parent.mkdir(parents=True, exist_ok=True)
-        csv_content = string_io.getvalue()
+            # ディレクトリ作成
+            full_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(full_path, "w", newline="", encoding="utf-8") as f:
-            f.write(csv_content)
-        print(f"Successfully created '{full_path}'.")
+            csv_content = string_io.getvalue()
+
+            # ファイル書き込み
+            with open(full_path, "w", newline="", encoding="utf-8") as f:
+                f.write(csv_content)
+
+            print(f"Successfully created '{full_path}'.")
+
+        except PermissionError as e:
+            # ディレクトリ作成やファイル書き込みの権限がない場合
+            raise StoragePermissionError(f"Permission denied for local file: {full_path}") from e
+
+        except IsADirectoryError as e:
+            # 保存しようとしたパスが、ファイルではなく既存のディレクトリだった場合
+            raise StorageError(f"Cannot save, path is a directory: {full_path}") from e
+
+        except OSError as e:
+            # ディスク容量不足、ファイル名が長すぎる、無効な文字が含まれるなど、
+            # その他のOSレベルのI/Oエラーを捕捉
+            raise StorageError(f"An OS error occurred while saving file: {full_path} ({e})") from e
+
 
     def read(self, filename: str) -> io.StringIO:
         full_path = self.output_path / filename
         print(f"LocalStorage: Reading '{filename}'.")
-        content = full_path.read_text(encoding='utf-8')
-        return io.StringIO(content)
+        try:
+            # full_pathはpathlib.Pathオブジェクトで、.read_text()はそのオブジェクトが持つ便利なメソッド
+            # .read_text()は、テキストファイルの中身を一度にすべて読み込み、1つの文字列として返すショートカットメソッド
+            # 内部的には open()を使っている。読み込めるファイル: .csv, .txt, .json, .py, .html など。。
+            # full_path.read_text() は、ファイルからテキストを読み込む際に、OSや元のファイルの改行コードの違いを吸収し、
+            # Pythonのプログラム内では原則として改行を \n (ラインフィード, LF) という単一の文字に統一して扱います。
+            # read_text() メソッドは、内部でファイルを開き、内容をすべて読み込んだ後、自動的にファイルをクローズします。
+            content = full_path.read_text(encoding='utf-8')
+            return io.StringIO(content)
+        except FileNotFoundError as e:
+            # FileNotFoundErrorを共通の例外に翻訳して再送出
+            raise StorageFileNotFoundError(f"Local file not found: {full_path}") from e
+        except PermissionError as e:
+            # PermissionErrorを共通の例外に翻訳して再送出
+            raise StoragePermissionError(f"Permission denied for local file: {full_path}") from e
+        except IsADirectoryError as e:
+            raise StorageError(f"Path is a directory, not a file: {full_path}") from e
+        except UnicodeDecodeError as e:
+            raise StorageError(f"Failed to decode file with UTF-8: {full_path}") from e
+        except OSError as e:
+            # その他のOS関連エラーをキャッチ
+            raise StorageError(f"An OS error occurred while reading file: {full_path}") from e
 
     def exists(self, filename: str) -> bool:
         full_path = self.output_path / filename
         return full_path.exists()
+
 
 
 # --- Concrete Strategy for GCS ---
@@ -71,10 +118,18 @@ class GCSStorageStrategy(StorageStrategy):
         print("(This is a simulation. Actual GCS upload is commented out.)")
 
     def read(self, filename: str) -> io.StringIO:
-        print(f"GCSStorage: Downloading '{filename}'. (Simulated)")
-        # blob = self.bucket.blob(filename)
-        # content = blob.download_as_string().decode('utf-8')
-        # return io.StringIO(content)
+        print(f"GCSStorage: Downloading '{filename}'.")
+        # try:
+        #     blob = self.bucket.blob(filename)
+        #     content = blob.download_as_string().decode('utf-8')
+        #     return io.StringIO(content)
+        # except NotFound as e:
+        #     # GCSのNotFound例外を共通の例外に翻訳
+        #     raise StorageFileNotFoundError(f"File '{filename}' not found in GCS bucket '{self.bucket_name}'") from e
+        # except Forbidden as e:
+        #     # GCSのForbidden例外（権限エラー）を共通の例外に翻訳
+        #     raise StoragePermissionError(f"Permission denied for GCS file '{filename}'") from e
+
         # --- シミュレーション用のダミーデータ ---
         dummy_content = "url\nhttps://example.com/from/gcs"
         return io.StringIO(dummy_content)
@@ -93,7 +148,7 @@ def get_storage_strategy(env: str, config: dict) -> StorageStrategy:
     """
     if env == 'production':
         return GCSStorageStrategy(bucket_name=config['GCS_BUCKET_NAME'])
-    else: # 'development' or any other value
+    else:
         project_root = pathlib.Path(__file__).parent
-        output_dir = project_root / config['DEFAULT_OUTPUT_DIR']
-        return LocalStorageStrategy(output_dir=str(output_dir))
+        output_path = project_root / config['DEFAULT_OUTPUT_DIR']
+        return LocalStorageStrategy(output_path=output_path)

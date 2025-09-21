@@ -4,8 +4,7 @@ import time
 import random
 import logging, logging.config
 from urllib.parse import urljoin, urlparse
-from playwright.sync_api import sync_playwright, Page, Error, Locator, BrowserContext
-
+from playwright.sync_api import sync_playwright, Page, Error, Locator, BrowserContext, Playwright, Browser
 import config
 from config_logging import LOGGING_CONFIG
 from storage_strategies import get_storage_strategy
@@ -34,12 +33,32 @@ STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 
 class Crawler:
     """
-    Manages the recursive crawling process.
-    It uses a single BrowserContext to create new pages for each task, ensuring isolation.
+    Playwrightのライフサイクル全体を管理し、
+    ウェブスクレイピングを実行する自己完結型コンポーネント。
     """
-    def __init__(self, context: BrowserContext):
-        self.context = context
+    def __init__(self):
+        self.playwright: Playwright = None
+        self.browser: Browser = None
+        self.context: BrowserContext = None
         self.results = []
+
+    def __enter__(self):
+        """with Crawler() as ... が呼ばれたときに実行される"""
+        self.playwright = sync_playwright().start()
+        self.browser = self.playwright.chromium.launch(headless=True)
+        self.context = self.browser.new_context(user_agent=random.choice(USER_AGENTS))
+        logger.info("Crawler initialized: Playwright started, Browser launched.")
+        return self # with ... as crawler: の crawler にこのインスタンス自身を返す
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """withブロックを抜けるときに、エラーの有無に関わらず実行される"""
+        if self.context:
+            self.context.close()
+        if self.browser:
+            self.browser.close()
+        if self.playwright:
+            self.playwright.stop()
+        logger.info("Crawler cleaned up: Context, Browser, and Playwright stopped.")
 
     def _safe_get_text(self, locator: Locator) -> str:
         """Safely gets text from a locator, returning "" if it doesn't exist."""
@@ -63,15 +82,17 @@ class Crawler:
         new_query = '&'.join([f"{k}={v}" for k, v in params.items()])
         return parsed_url._replace(query=new_query).geturl()
 
-    def scrape_page(self, url: str, page: Page, title: str = "", depth: int = 0):
+    def scrape_page(self, url: str, title: str = "", depth: int = 0): # page引数を削除
         """
-        Recursively scrapes a page to find links.
-        For each recursive call, a new page (tab) is created to avoid state conflicts.
+        あるURLのスクレイピングに関する全責任を持つ。
+        ページの生成から破棄までを、このメソッド内で完結させる。
         """
         if depth > MAX_RECURSION_DEPTH:
-            logger.warning(f"Max recursion depth ({MAX_RECURSION_DEPTH}) reached. Stopping crawl at: {url}")
+            # ...
             return
 
+        # ★ メソッドの最初に、自身が使うページを作成する
+        page = self.context.new_page()
         logger.info(f"Scraping [Depth: {depth}]: {url}")
 
         try:
@@ -132,14 +153,7 @@ class Crawler:
                         logger.debug(f"Found Answer URL: {modified_url}")
                         self.results.append({full_title: modified_url})
                     elif YOUTUBE_TOPIC_STRING in modified_url:
-                        # 再帰呼び出しの際は、新しいページ(タブ)を作成する
-                        new_page = self.context.new_page()
-                        try:
-                            # 新しいページを渡して再帰処理
-                            self.scrape_page(modified_url, new_page, full_title, depth + 1)
-                        finally:
-                            # 処理が終わったら必ずページを閉じる
-                            new_page.close()
+                        self.scrape_page(modified_url, full_title, depth + 1)
                     else:
                         logger.warning(f"URL is out of scope (not answer/topic): {modified_url}")
 
@@ -147,6 +161,9 @@ class Crawler:
             logger.error(f"A Playwright error occurred on {page.url}: {e}")
         except Exception as e:
             logger.error(f"An unexpected error occurred on {page.url}: {e}")
+        finally:
+            # ★ メソッドの最後に、自身が作ったページを必ず閉じる
+            page.close()
 
 
 def execute():
@@ -177,28 +194,10 @@ def execute():
         # page や browser からの指令がWebSocketを介してNode.jsサーバーに届き、その結果ブラウザが操作される。
         # 結局のところ、p は、Playwrightの全機能への入口となるオブジェクトで、Playwrightの実行環境
         # （バックグラウンドで動くNode.jsサーバープロセス）を安全に起動・終了するためのもの。
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            # ブラウザコンテキストを最初に作成
-            context = browser.new_context(user_agent=random.choice(USER_AGENTS))
-            try:
-                crawler = Crawler(context)
 
-                # 各シードURLに対して、独立したページで処理を開始
-                for url in seed_urls:
-                    page = context.new_page()
-                    try:
-                        logger.info('--------------------------------------------------')
-                        logger.info(f"↓↓↓ Starting crawl from top-level URL: {url} ↓↓↓")
-                        crawler.scrape_page(url, page)
-                        logger.info(f"↑↑↑ Finished crawl for top-level URL: {url} ↑↑↑")
-                    finally:
-                        # 1つのシードURLの処理が終わったら、そのページ(タブ)を閉じる
-                        page.close()
-            finally:
-                # すべての処理が終わったらコンテキストとブラウザを閉じる
-                context.close()
-                browser.close()
+        with Crawler() as crawler:
+            for url in seed_urls:
+                crawler.scrape_page(url)
 
         all_articles = crawler.results
         if not all_articles:
