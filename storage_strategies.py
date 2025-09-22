@@ -1,6 +1,7 @@
 import io
 import pathlib
 from abc import ABC, abstractmethod
+import sqlite3
 class StorageError(Exception):
     pass
 class StorageFileNotFoundError(StorageError):
@@ -149,14 +150,134 @@ class GCSStorageStrategy(StorageStrategy):
         return True # シミュレーション
 
 
+class SQLiteStorageStrategy(StorageStrategy):
+    """Saves and reads content to/from a local SQLite database."""
+
+    def __init__(self, db_path: pathlib.Path):
+        """
+        Initializes the SQLite storage strategy.
+
+        Args:
+            db_path: The path to the SQLite database file.
+        """
+        self.db_path = db_path
+        self._conn = None
+        try:
+            # データベースファイルが置かれるディレクトリを作成
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self._create_table()
+        except sqlite3.OperationalError as e:
+            # ディレクトリのパーミッションがない、ディスクが書き込み不可などの場合に発生
+            raise StoragePermissionError(f"Could not connect to or create database at '{self.db_path}': {e}") from e
+        except OSError as e:
+            # mkdirでOSレベルのエラーが発生した場合
+            raise StoragePermissionError(f"Could not create directory for database at '{self.db_path.parent}': {e}") from e
+
+
+    def _create_table(self):
+        """Ensures the 'pages' table exists in the database."""
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS pages (
+            url TEXT PRIMARY KEY,
+            html_content TEXT NOT NULL,
+            scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        );
+        """
+        try:
+            cursor = self._conn.cursor()
+            cursor.execute(create_table_sql)
+            self._conn.commit()
+        except sqlite3.Error as e:
+            raise StorageError(f"Failed to create table in database '{self.db_path}': {e}") from e
+
+
+    def save(self, string_io: io.StringIO, filename: str):
+        """
+        Saves HTML content to the database. The filename is used as the URL.
+        If the URL already exists, its content and timestamp are updated.
+        """
+        html_content = string_io.getvalue()
+        url = filename # このコンテキストではfilenameがURLとなる
+
+        # INSERT OR REPLACE は、主キー(url)が既存の場合はUPDATE、存在しない場合はINSERTを実行します。
+        sql = """
+        INSERT OR REPLACE INTO pages (url, html_content, scraped_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP);
+        """
+        try:
+            print(f"Using SQLiteStorageStrategy to save URL: '{url}'")
+            cursor = self._conn.cursor()
+            cursor.execute(sql, (url, html_content))
+            self._conn.commit()
+            print(f"Successfully saved/updated '{url}' in '{self.db_path}'.")
+        except sqlite3.Error as e:
+            self._conn.rollback()
+            raise StorageError(f"Failed to save to SQLite database: {e}") from e
+
+
+    def read(self, filename: str) -> io.StringIO:
+        """Reads HTML content from the database using the URL as a key."""
+        url = filename
+        sql = "SELECT html_content FROM pages WHERE url = ?;"
+        try:
+            print(f"SQLiteStorage: Reading '{url}'.")
+            cursor = self._conn.cursor()
+            cursor.execute(sql, (url,))
+            result = cursor.fetchone() # (html_content,) というタプル or None
+
+            if result:
+                return io.StringIO(result[0])
+            else:
+                raise StorageFileNotFoundError(f"URL not found in SQLite database: {url}")
+        except sqlite3.Error as e:
+            raise StorageError(f"Failed to read from SQLite database: {e}") from e
+
+
+    def exists(self, filename: str) -> bool:
+        """Checks if a record for the given URL exists in the database."""
+        url = filename
+        # 存在確認は COUNT(*) よりも SELECT 1 の方が一般的に高速です
+        sql = "SELECT 1 FROM pages WHERE url = ?;"
+        try:
+            cursor = self._conn.cursor()
+            cursor.execute(sql, (url,))
+            result = cursor.fetchone()
+            return result is not None
+        except sqlite3.Error as e:
+            # エラー発生時は「存在しない」として扱う方が安全な場合が多い
+            print(f"An error occurred while checking existence in SQLite: {e}")
+            return False
+
+    def close(self):
+        """Closes the database connection."""
+        if self._conn:
+            self._conn.close()
+            self._conn = None
+            print(f"SQLite connection to '{self.db_path}' closed.")
+
+
 # --- Factory Function ---
-def get_storage_strategy(env: str, config: dict) -> StorageStrategy:
+def get_storage_strategy(
+    env: str,
+    config: dict,
+    step_context: str = 'default' # デフォルト値を設定
+) -> StorageStrategy:
     """
-    Factory function to select the appropriate storage strategy based on the environment.
+    Factory function to select the appropriate storage strategy.
     """
     if env == 'production':
+        # 本番は常にGCSなので変更なし
         return GCSStorageStrategy(bucket_name=config['GCS_BUCKET_NAME'])
+
+    # --- 開発環境の場合の分岐 ---
+    if step_context == 'step4':
+        # step4の開発環境ではSQLiteを使う
+        project_root = pathlib.Path(__file__).parent
+        db_path = project_root / config['LOCAL_STORAGE_DIR'] / 'scraped_pages.sqlite'
+        return SQLiteStorageStrategy(db_path=db_path)
     else:
+        # それ以外のステップ(step1-3)では、従来通りローカルファイルシステムを使う
         project_root = pathlib.Path(__file__).parent
         local_storage_path = project_root / config['LOCAL_STORAGE_DIR']
         return LocalStorageStrategy(local_storage_path=local_storage_path)
