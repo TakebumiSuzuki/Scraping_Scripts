@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright, Playwright, Error
 
 import config
 from storage_strategies import get_storage_strategy
+from utils import convert_rows_to_in_memory_csv
 
 import logging
 from config_logging import setup_logging
@@ -93,14 +94,14 @@ def execute(target_url: str = TARGET_URL, base_url: str = BASE_URL):
 
         logger.info(f"Successfully extracted a total of {len(urls)} URLs.")
 
+
         # Step 3: Write URLs to an in-memory virtual CSV
-        logger.info("Writing extracted URLs to in-memory CSV buffer.")
-        string_io = io.StringIO()
-        writer = csv.writer(string_io)
-        for url in urls:
-            # csv.writer.writerow() expects an iterable (like a list) for each row.
-            writer.writerow([url])
-        logger.debug("In-memory CSV buffer created successfully.")
+        logger.info("Preparing extracted URLs for CSV conversion...")
+        # データ形式を List[str] から List[List[str]] に変換する
+        rows_to_write = [[url] for url in urls]
+        logger.info("Converting extracted URLs to in-memory CSV buffer...")
+        string_io = convert_rows_to_in_memory_csv(rows_to_write)
+        logger.info("In-memory CSV buffer created successfully.")
 
         # Step 4: Use the selected strategy to save the file
         logger.info(f"Attempting to save URLs to '{DEFAULT_FILENAME}'...")

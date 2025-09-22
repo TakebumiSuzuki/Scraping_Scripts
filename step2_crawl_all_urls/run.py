@@ -1,45 +1,62 @@
-import io
 import csv
 import time
 import random
-import logging, logging.config
 from urllib.parse import urljoin, urlparse
-from playwright.sync_api import sync_playwright, Page, Error, Locator, BrowserContext
+from playwright.sync_api import sync_playwright, Error, Locator, BrowserContext, Playwright, Browser
 
 import config
-from config_logging import LOGGING_CONFIG
 from storage_strategies import get_storage_strategy
+from utils import convert_rows_to_in_memory_csv
 
-logging.config.dictConfig(LOGGING_CONFIG)
+import logging
+from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
+LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
-DEFAULT_OUTPUT_DIR = config.DEFAULT_OUTPUT_DIR
 TIMEOUT_MS = config.TIMEOUT * 1000
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15",
-]
-
-BASE_URL = "https://support.google.com"
-MAX_RECURSION_DEPTH = 4
-YOUTUBE_ANSWER_STRING = 'youtube/answer'
-YOUTUBE_TOPIC_STRING = 'youtube/topic'
+USER_AGENTS = config.USER_AGENTS
 STEP1_FILENAME = config.STEP1_OUTPUT_FILENAME
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 
-
 class Crawler:
     """
-    Manages the recursive crawling process.
-    It uses a single BrowserContext to create new pages for each task, ensuring isolation.
+    Playwrightのライフサイクル全体を管理し、
+    ウェブスクレイピングを実行する自己完結型コンポーネント。
     """
-    def __init__(self, context: BrowserContext):
-        self.context = context
+    MAX_RECURSION_DEPTH = 4
+    YOUTUBE_ANSWER_STRING = 'youtube/answer'
+    YOUTUBE_TOPIC_STRING = 'youtube/topic'
+    BASE_URL = "https://support.google.com"
+
+    def __init__(self, timeout_ms: int, user_agents: list[str]):
+        self.playwright: Playwright = None
+        self.browser: Browser = None
+        self.context: BrowserContext = None
         self.results = []
+        self.timeout_ms = timeout_ms
+        self.user_agents = user_agents
+
+    def __enter__(self):
+        """with Crawler() as ... が呼ばれたときに実行される"""
+        # start()はバックグラウンドでPlaywrightのサーバープロセスが起動し、接続準備が整うまで処理を同期処理、つまりブロックします。
+        self.playwright = sync_playwright().start()
+        self.browser = self.playwright.chromium.launch(headless=True)
+        self.context = self.browser.new_context(user_agent=random.choice(self.user_agents))
+        logger.info("Crawler initialized: Playwright started, Browser launched.")
+        return self # with ... as crawler: の crawler にこのインスタンス自身を返す
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """withブロックを抜けるときに、エラーの有無に関わらず実行される"""
+        if self.context:
+            self.context.close()
+        if self.browser:
+            self.browser.close()
+        if self.playwright:
+            self.playwright.stop()
+        logger.info("Crawler cleaned up: Context, Browser, and Playwright stopped.")
 
     def _safe_get_text(self, locator: Locator) -> str:
         """Safely gets text from a locator, returning "" if it doesn't exist."""
@@ -55,7 +72,7 @@ class Crawler:
         if not original_url:
             return ""
 
-        full_url = urljoin(BASE_URL, original_url)
+        full_url = urljoin(self.BASE_URL, original_url)
         parsed_url = urlparse(full_url)
         query = parsed_url.query
         params = dict(p.split('=') for p in query.split('&')) if query else {}
@@ -63,19 +80,21 @@ class Crawler:
         new_query = '&'.join([f"{k}={v}" for k, v in params.items()])
         return parsed_url._replace(query=new_query).geturl()
 
-    def scrape_page(self, url: str, page: Page, title: str = "", depth: int = 0):
+    def scrape_page(self, url: str, title: str = "", depth: int = 0) -> None:
         """
-        Recursively scrapes a page to find links.
-        For each recursive call, a new page (tab) is created to avoid state conflicts.
+        あるURLのスクレイピングに関する全責任を持つ。
+        ページの生成から破棄までを、このメソッド内で完結させる。
         """
-        if depth > MAX_RECURSION_DEPTH:
-            logger.warning(f"Max recursion depth ({MAX_RECURSION_DEPTH}) reached. Stopping crawl at: {url}")
+        if depth > self.MAX_RECURSION_DEPTH:
+            # ...
             return
 
+        # ★ メソッドの最初に、自身が使うページを作成する
+        page = self.context.new_page()
         logger.info(f"Scraping [Depth: {depth}]: {url}")
 
         try:
-            page.goto(url, timeout=TIMEOUT_MS, wait_until="networkidle")
+            page.goto(url, timeout=self.timeout_ms, wait_until="networkidle")
             time.sleep(random.uniform(1, 2))
 
             # locatorオブジェクト自体は「指示書」や「リモコン」のようなものですが、.count()や.all()のような
@@ -128,18 +147,11 @@ class Crawler:
                     if not modified_url:
                         continue
 
-                    if YOUTUBE_ANSWER_STRING in modified_url:
+                    if self.YOUTUBE_ANSWER_STRING in modified_url:
                         logger.debug(f"Found Answer URL: {modified_url}")
                         self.results.append({full_title: modified_url})
-                    elif YOUTUBE_TOPIC_STRING in modified_url:
-                        # 再帰呼び出しの際は、新しいページ(タブ)を作成する
-                        new_page = self.context.new_page()
-                        try:
-                            # 新しいページを渡して再帰処理
-                            self.scrape_page(modified_url, new_page, full_title, depth + 1)
-                        finally:
-                            # 処理が終わったら必ずページを閉じる
-                            new_page.close()
+                    elif self.YOUTUBE_TOPIC_STRING in modified_url:
+                        self.scrape_page(modified_url, full_title, depth + 1)
                     else:
                         logger.warning(f"URL is out of scope (not answer/topic): {modified_url}")
 
@@ -147,16 +159,19 @@ class Crawler:
             logger.error(f"A Playwright error occurred on {page.url}: {e}")
         except Exception as e:
             logger.error(f"An unexpected error occurred on {page.url}: {e}")
+        finally:
+            # ★ メソッドの最後に、自身が作ったページを必ず閉じる
+            page.close()
 
 
-def execute():
+def execute() -> None:
     """Main execution function for step 2."""
     logger.info("--- Step 2: Starting Recursive URL Crawling ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
     storage = get_storage_strategy(APP_ENV, {
+        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
         'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-        'DEFAULT_OUTPUT_DIR': DEFAULT_OUTPUT_DIR,
     })
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
@@ -177,40 +192,23 @@ def execute():
         # page や browser からの指令がWebSocketを介してNode.jsサーバーに届き、その結果ブラウザが操作される。
         # 結局のところ、p は、Playwrightの全機能への入口となるオブジェクトで、Playwrightの実行環境
         # （バックグラウンドで動くNode.jsサーバープロセス）を安全に起動・終了するためのもの。
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            # ブラウザコンテキストを最初に作成
-            context = browser.new_context(user_agent=random.choice(USER_AGENTS))
-            try:
-                crawler = Crawler(context)
 
-                # 各シードURLに対して、独立したページで処理を開始
-                for url in seed_urls:
-                    page = context.new_page()
-                    try:
-                        logger.info('--------------------------------------------------')
-                        logger.info(f"↓↓↓ Starting crawl from top-level URL: {url} ↓↓↓")
-                        crawler.scrape_page(url, page)
-                        logger.info(f"↑↑↑ Finished crawl for top-level URL: {url} ↑↑↑")
-                    finally:
-                        # 1つのシードURLの処理が終わったら、そのページ(タブ)を閉じる
-                        page.close()
-            finally:
-                # すべての処理が終わったらコンテキストとブラウザを閉じる
-                context.close()
-                browser.close()
+        with Crawler(timeout_ms=TIMEOUT_MS, user_agents=USER_AGENTS) as crawler:
+            for url in seed_urls:
+                crawler.scrape_page(url)
 
         all_articles = crawler.results
         if not all_articles:
             logger.warning("Crawling finished, but no articles were collected.")
             return
 
-        logger.info(f"Writing {len(all_articles)} discovered articles to in-memory CSV...")
-        output_io = io.StringIO()
-        writer = csv.writer(output_io)
-        for article_dict in all_articles:
-            for title, url in article_dict.items():
-                writer.writerow([title, url])
+        logger.info(f"Preparing {len(all_articles)} discovered articles for CSV conversion...")
+        # データ形式を List[Dict] から List[List[str]] に変換する
+        rows_to_write = [[title, url] for article in all_articles for title, url in article.items()]
+
+        logger.info("Converting articles to in-memory CSV buffer...")
+        output_io = convert_rows_to_in_memory_csv(rows_to_write) # 汎用関数を呼び出す
+        logger.debug("In-memory CSV buffer created successfully.")
 
         logger.info(f"Saving articles to '{STEP2_FILENAME}'...")
         storage.save(output_io, STEP2_FILENAME)
@@ -227,4 +225,5 @@ def execute():
 
 
 if __name__ == "__main__":
+    setup_logging()
     execute()

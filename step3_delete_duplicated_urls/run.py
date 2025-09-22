@@ -1,12 +1,8 @@
-'''
-cvsのリストの後ろから順に調べていって、除外する。
-結果として850行の重複のないurlリスト(cfg.CLEANED_URLS_CSV)が出力される
-'''
-
 import csv
-import io
 import config
+
 from storage_strategies import get_storage_strategy, StorageFileNotFoundError, StoragePermissionError
+from utils import convert_rows_to_in_memory_csv
 
 import logging
 from config_logging import setup_logging
@@ -14,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
-GCS_BUCKET_NAME = ''
 LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
+GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
 
-def process_rows(rows):
+def remove_duplicate_rows_by_url(rows):
     seen_urls = set()
     unique_rows = []
     for row in reversed(rows):
@@ -36,12 +32,12 @@ def process_rows(rows):
 
 def execute():
 
-    logger.info("--- Step 3:  ---")
+    logger.info("--- Step 3: Removing Duplicate URLs and Saving the unique URLs List ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
     app_config = {
-        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
         'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
+        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
     }
     storage = get_storage_strategy(APP_ENV, app_config)
 
@@ -54,32 +50,31 @@ def execute():
         rows = list(reader)
         logger.info(f"Successfully loaded {len(rows)} rows.")
 
-        processed_rows = process_rows(rows)
-        # 処理結果をメモリ上のStringIOに書き出す
-        string_io_output = io.StringIO()
-        writer = csv.writer(string_io_output)
-        writer.writerows(processed_rows)
+        processed_rows = remove_duplicate_rows_by_url(rows)
+        logger.info(f"Successfully processed {len(processed_rows)} unique rows.")
 
-        # storage.save()を使ってデータを保存する
-        # 書き込み終わったStringIOオブジェクトを渡す
+        # --- ここからが修正部分 ---
+        logger.info(f"Converting {len(processed_rows)} unique rows to in-memory CSV...")
+        string_io_output = convert_rows_to_in_memory_csv(processed_rows)
+        logger.debug("In-memory CSV buffer created successfully.")
+
+        logger.info(f"Saving unique rows to '{STEP3_FILENAME}'...")
         storage.save(string_io_output, STEP3_FILENAME)
-
-        logger.debug(f"処理が完了しました。結果は {STEP3_FILENAME} に保存されました。")
+        logger.info(f"Successfully saved {len(processed_rows)} rows to '{STEP3_FILENAME}'.")
 
     except StorageFileNotFoundError as e: # ← ここを変更！
         logger.error(f"ファイルが見つかりません: {e}")
+        return
     except StoragePermissionError as e: # ← ここを変更！
         logger.error(f"ファイルへのアクセス権限がありません: {e}")
+        return
     except csv.Error as e:
         logger.error(f"CSVファイルの処理中にエラーが発生しました: {e}")
+        return
     except Exception as e:
         logger.error(f"予期せぬエラーが発生しました: {e}", exc_info=True) # exc_info=True を付けると詳細なトレースバックがログに出力される
-    else:
-        logger.info('エラーなどなく、CSVファイルが作成されました')
-        return
 
-    logger.warning("エラーにより途中でプロセスを中止しました")
-    return
+    logger.info("--- Step 3: Finished successfully ---")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ LOCAL_STORAGE_DIR = 'outputs'
 TIMEOUT = int(os.environ.get('TIMEOUT', '30'))
 
 # The filename contract between Step 1 and Step 2.
-STEP1_OUTPUT_FILENAME = 'seed_urls.csv'
+STEP1_OUTPUT_FILENAME = 'seed_urls_list.csv'
 STEP2_OUTPUT_FILENAME = 'raw_urls_list.csv'
 STEP3_OUTPUT_FILENAME = 'unique_urls_list.csv'
 
