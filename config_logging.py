@@ -1,3 +1,5 @@
+import logging.config
+
 LOGGING_CONFIG = {
     'version': 1,
 
@@ -18,7 +20,6 @@ LOGGING_CONFIG = {
         },
     },
 
-    # 'handlers' define where log messages are sent.
     'handlers': {
         # Handler for printing logs to the console (standard output).
         'console': {
@@ -39,21 +40,18 @@ LOGGING_CONFIG = {
         },
     },
 
-    # 'loggers' are the entry points to the logging system.
     'loggers': {
-        # The 'root' logger is a catch-all for any logger that is not
-        # explicitly defined. Good for setting a baseline.
         'root': {
             'level': 'DEBUG', # The lowest threshold for the logger itself.
             'handlers': ['console', 'file'],
         },
+
         # Example of a specific logger for a third-party library.
         # This prevents overly verbose logs from playwright.
         # Playwrightライブラリが内部でログを出す際に使用しているのと同じ名前 ('playwright') を指定することで、
         # そのロガーの設定を上書き・制御する。Playwrightの作者は、'playwright' という名前を付けて使っている。
         # 「PlaywrightのINFOレベルのログは不要だけど、WARNING以上は知りたい」という事。
         # そして、propagateはデフォルトでTrueに設定されているので、Falseに変更する。
-
         'playwright': {
             'level': 'WARNING',
             'handlers': ['console', 'file'],
@@ -61,3 +59,6 @@ LOGGING_CONFIG = {
         },
     },
 }
+
+def setup_logging():
+    logging.config.dictConfig(LOGGING_CONFIG)

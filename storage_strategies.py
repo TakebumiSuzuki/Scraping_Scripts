@@ -32,21 +32,18 @@ class StorageStrategy(ABC):
 # --- Concrete Strategy for Local Storage ---
 class LocalStorageStrategy(StorageStrategy):
     """Saves the content to a local file."""
-    #　def __init__(self, input_dir: str, output_dir: str):
-    def __init__(self, output_path: pathlib.Path):
-        self.output_path = output_path
+    def __init__(self, local_storage_path: pathlib.Path):
+        self.local_storage_path = local_storage_path
 
     def save(self, string_io: io.StringIO, filename: str):
         try:
-            full_path = self.output_path / filename
+            full_path = self.local_storage_path / filename
             print(f"Using LocalStorageStrategy to save to: '{full_path}'")
 
-            # ディレクトリ作成
             full_path.parent.mkdir(parents=True, exist_ok=True)
 
             csv_content = string_io.getvalue()
 
-            # ファイル書き込み
             with open(full_path, "w", newline="", encoding="utf-8") as f:
                 f.write(csv_content)
 
@@ -67,7 +64,7 @@ class LocalStorageStrategy(StorageStrategy):
 
 
     def read(self, filename: str) -> io.StringIO:
-        full_path = self.output_path / filename
+        full_path = self.local_storage_path / filename
         print(f"LocalStorage: Reading '{filename}'.")
         try:
             # full_pathはpathlib.Pathオブジェクトで、.read_text()はそのオブジェクトが持つ便利なメソッド
@@ -93,8 +90,19 @@ class LocalStorageStrategy(StorageStrategy):
             raise StorageError(f"An OS error occurred while reading file: {full_path}") from e
 
     def exists(self, filename: str) -> bool:
-        full_path = self.output_path / filename
-        return full_path.exists()
+        try:
+            full_path = self.local_storage_path / filename
+            return full_path.exists()
+        except PermissionError:
+            # 権限エラーで確認できない場合は「存在しない」として扱うか、
+            # もしくはログを出力するなど、アプリケーションの要件に応じて対応する。
+            # ここではシンプルに False を返す例を示す。
+            print(f"Permission denied while checking existence of '{full_path}'.")
+            return False
+        except OSError as e:
+            # その他のOSエラーが発生した場合も同様
+            print(f"An OS error occurred while checking existence: {e}")
+            return False
 
 
 
@@ -150,5 +158,5 @@ def get_storage_strategy(env: str, config: dict) -> StorageStrategy:
         return GCSStorageStrategy(bucket_name=config['GCS_BUCKET_NAME'])
     else:
         project_root = pathlib.Path(__file__).parent
-        output_path = project_root / config['DEFAULT_OUTPUT_DIR']
-        return LocalStorageStrategy(output_path=output_path)
+        local_storage_path = project_root / config['LOCAL_STORAGE_DIR']
+        return LocalStorageStrategy(local_storage_path=local_storage_path)

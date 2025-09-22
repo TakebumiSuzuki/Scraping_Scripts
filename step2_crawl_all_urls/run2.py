@@ -2,20 +2,19 @@ import io
 import csv
 import time
 import random
-import logging, logging.config
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright, Page, Error, Locator, BrowserContext, Playwright, Browser
 import config
-from config_logging import LOGGING_CONFIG
 from storage_strategies import get_storage_strategy
 
-logging.config.dictConfig(LOGGING_CONFIG)
+import logging
+from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
-DEFAULT_OUTPUT_DIR = config.DEFAULT_OUTPUT_DIR
+LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -173,7 +172,7 @@ def execute():
 
     storage = get_storage_strategy(APP_ENV, {
         'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-        'DEFAULT_OUTPUT_DIR': DEFAULT_OUTPUT_DIR,
+        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
     })
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
@@ -226,4 +225,5 @@ def execute():
 
 
 if __name__ == "__main__":
+    setup_logging()
     execute()

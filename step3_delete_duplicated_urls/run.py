@@ -8,15 +8,14 @@ import io
 import config
 from storage_strategies import get_storage_strategy, StorageFileNotFoundError, StoragePermissionError
 
-import logging, logging.config
-from config_logging import LOGGING_CONFIG
-logging.config.dictConfig(LOGGING_CONFIG)
+import logging
+from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
 GCS_BUCKET_NAME = ''
-DEFAULT_OUTPUT_DIR = config.DEFAULT_OUTPUT_DIR
+LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
@@ -42,7 +41,7 @@ def execute():
 
     app_config = {
         'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-        'DEFAULT_OUTPUT_DIR': DEFAULT_OUTPUT_DIR,
+        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
     }
     storage = get_storage_strategy(APP_ENV, app_config)
 
@@ -84,4 +83,5 @@ def execute():
 
 
 if __name__ == "__main__":
+    setup_logging()
     execute()
