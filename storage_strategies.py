@@ -187,7 +187,11 @@ class SQLiteStorageStrategy(StorageStrategy):
         self.db_path = db_path
         self._conn = None
         try:
+            # parents=Trueの場合、途中の親ディレクトリが存在しなくても、再帰的にすべての親ディレクトリを作成します。
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            # self.db_pathにファイルがまだ存在しない場合は、この時点で新しく作成される
+            # check_same_thread=False を設定すると、複数のスレッドから同じデータベース接続を共有できるようになる。
+            # この場合、開発者自身がスレッドセーフティ（排他制御など）を考慮する必要がある。
             self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
             self._create_table()
         except sqlite3.OperationalError as e:
@@ -208,6 +212,8 @@ class SQLiteStorageStrategy(StorageStrategy):
         );
         """
         try:
+            # カーソルは一つだけではなく、conn.cursor()を呼び出すたびに新しいカーソルオブジェクトが生成されます。
+            # そして、一般的にはSQLを実行する処理の都度、新しくカーソルを取得し、使い捨てる
             cursor = self._conn.cursor()
             cursor.execute(create_table_sql)
             self._conn.commit()
@@ -225,6 +231,7 @@ class SQLiteStorageStrategy(StorageStrategy):
         category = metadata.get('category', '') if metadata else ''
 
         # reference_urlがUNIQUE制約を持つため、ON CONFLICTでUPDATEする
+        # ON CONFLICT構文を使うことにより、一つのSQLクエリでアトミックに upseart 作業が行える。　
         sql = """
         INSERT INTO scraped_pages (reference_url, category, content, scraped_at)
         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
@@ -278,7 +285,7 @@ class SQLiteStorageStrategy(StorageStrategy):
             self._conn = None
             print(f"SQLite connection to '{self.db_path}' closed.")
 
-    # ★SQLite用のイテレータを実装
+    # この関数が呼ばれると、rowを返すのではなく、この関数から作られるジェネレーターインスタンスがメモリ上に展開され、返される。
     def get_storage_iterator(self) -> Iterator[tuple]:
         """
         Connects to the database and yields all pages one by one to save memory.
@@ -288,7 +295,7 @@ class SQLiteStorageStrategy(StorageStrategy):
             raise StorageFileNotFoundError(f"Database file not found: {self.db_path}")
 
         conn = None
-        # ここで with は使えない。なぜなら、sqlite3 でのwithは、トランザクションの管理を自動的に行ってくれるためのものなので。
+        # ここで with構文は使えない。なぜなら、sqlite3でのwithは、トランザクションの管理を自動的に行ってくれるためのものなので。
         try:
             conn = sqlite3.connect(self.db_path)
             #  SQLiteのデータベース内では、TEXT 型のデータは特定のエンコーディング（通常はUTF-8）のバイト列として保存されています。

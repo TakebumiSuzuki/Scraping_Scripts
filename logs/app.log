@@ -60,3 +60,227 @@
 2025-09-23 09:21:18 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501 closed.
 2025-09-23 09:21:18 - __main__ - INFO - Waiting for 3.66 seconds...
 2025-09-23 09:21:19 - __main__ - INFO - Browser closed and Playwright stopped.
+2025-09-23 13:09:41 - __main__ - INFO - --- Step 4: Starting Scrape and Save HTML ---
+2025-09-23 13:09:41 - __main__ - INFO - Running in 'development' environment.
+2025-09-23 13:09:41 - __main__ - INFO - Input Storage: 'LocalStorageStrategy'
+2025-09-23 13:09:41 - __main__ - INFO - Output Storage: 'SQLiteStorageStrategy'
+2025-09-23 13:09:41 - __main__ - INFO - Loading unique URLs from 'unique_urls_list.csv'...
+2025-09-23 13:09:41 - __main__ - INFO - Loaded 1049 URLs with categories.
+2025-09-23 13:09:41 - __main__ - INFO - Scraper class initialized.
+2025-09-23 13:09:41 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-09-23 13:09:42 - __main__ - INFO - Playwright started and Chromium browser launched.
+2025-09-23 13:09:42 - __main__ - INFO - --- [ATTEMPT 1/3] Processing 1049 URLs... ---
+2025-09-23 13:09:42 - __main__ - INFO - --- Processing URL 1/1049: https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449 ---
+2025-09-23 13:09:42 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449
+2025-09-23 13:09:46 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:09:46 - __main__ - DEBUG - Clicked element 1/5.
+2025-09-23 13:09:46 - __main__ - DEBUG - Clicked element 2/5.
+2025-09-23 13:09:47 - __main__ - DEBUG - Clicked element 3/5.
+2025-09-23 13:09:48 - __main__ - DEBUG - Clicked element 4/5.
+2025-09-23 13:09:48 - __main__ - DEBUG - Clicked element 5/5.
+2025-09-23 13:09:49 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449.
+2025-09-23 13:09:49 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449 closed.
+2025-09-23 13:09:49 - __main__ - INFO - Waiting for 3.12 seconds...
+2025-09-23 13:09:52 - __main__ - INFO - --- Processing URL 2/1049: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449 ---
+2025-09-23 13:09:52 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449
+2025-09-23 13:09:57 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:09:57 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449.
+2025-09-23 13:09:57 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449 closed.
+2025-09-23 13:09:57 - __main__ - INFO - Waiting for 2.25 seconds...
+2025-09-23 13:09:59 - __main__ - INFO - --- Processing URL 3/1049: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244 ---
+2025-09-23 13:09:59 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244
+2025-09-23 13:10:02 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:02 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244.
+2025-09-23 13:10:02 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244 closed.
+2025-09-23 13:10:02 - __main__ - INFO - Waiting for 3.60 seconds...
+2025-09-23 13:10:06 - __main__ - INFO - --- Processing URL 4/1049: https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244 ---
+2025-09-23 13:10:06 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244
+2025-09-23 13:10:11 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:11 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244.
+2025-09-23 13:10:11 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244 closed.
+2025-09-23 13:10:11 - __main__ - INFO - Waiting for 2.54 seconds...
+2025-09-23 13:10:14 - __main__ - INFO - --- Processing URL 5/1049: https://support.google.com/youtube/answer/7071292?hl=en&ref_topic=13343244 ---
+2025-09-23 13:10:14 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/7071292?hl=en&ref_topic=13343244
+2025-09-23 13:10:16 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:16 - __main__ - ERROR - Target element '.article-container' not found on https://support.google.com/youtube/answer/7071292?hl=en&ref_topic=13343244.
+2025-09-23 13:10:16 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/7071292?hl=en&ref_topic=13343244 closed.
+2025-09-23 13:10:16 - __main__ - ERROR - Failed on attempt 1 for URL https://support.google.com/youtube/answer/7071292?hl=en&ref_topic=13343244: Scraping returned None, indicating a failure.
+2025-09-23 13:10:16 - __main__ - INFO - Waiting for 3.07 seconds...
+2025-09-23 13:10:19 - __main__ - INFO - --- Processing URL 6/1049: https://support.google.com/youtube/answer/3545535?hl=en&ref_topic=13343244 ---
+2025-09-23 13:10:19 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/3545535?hl=en&ref_topic=13343244
+2025-09-23 13:10:22 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:22 - __main__ - ERROR - Target element '.article-container' not found on https://support.google.com/youtube/answer/3545535?hl=en&ref_topic=13343244.
+2025-09-23 13:10:22 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/3545535?hl=en&ref_topic=13343244 closed.
+2025-09-23 13:10:22 - __main__ - ERROR - Failed on attempt 1 for URL https://support.google.com/youtube/answer/3545535?hl=en&ref_topic=13343244: Scraping returned None, indicating a failure.
+2025-09-23 13:10:22 - __main__ - INFO - Waiting for 3.01 seconds...
+2025-09-23 13:10:25 - __main__ - INFO - --- Processing URL 7/1049: https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244 ---
+2025-09-23 13:10:25 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244
+2025-09-23 13:10:28 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:28 - __main__ - DEBUG - Clicked element 1/4.
+2025-09-23 13:10:28 - __main__ - DEBUG - Clicked element 2/4.
+2025-09-23 13:10:29 - __main__ - DEBUG - Clicked element 3/4.
+2025-09-23 13:10:29 - __main__ - DEBUG - Clicked element 4/4.
+2025-09-23 13:10:30 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244.
+2025-09-23 13:10:30 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244 closed.
+2025-09-23 13:10:30 - __main__ - INFO - Waiting for 2.07 seconds...
+2025-09-23 13:10:32 - __main__ - INFO - --- Processing URL 8/1049: https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501 ---
+2025-09-23 13:10:32 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501
+2025-09-23 13:10:35 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:35 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501.
+2025-09-23 13:10:35 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:10:35 - __main__ - INFO - Waiting for 3.79 seconds...
+2025-09-23 13:10:39 - __main__ - INFO - --- Processing URL 9/1049: https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501 ---
+2025-09-23 13:10:39 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501
+2025-09-23 13:10:42 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:42 - __main__ - DEBUG - Clicked element 1/1.
+2025-09-23 13:10:43 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501.
+2025-09-23 13:10:43 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:10:43 - __main__ - INFO - Waiting for 3.55 seconds...
+2025-09-23 13:10:46 - __main__ - INFO - --- Processing URL 10/1049: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501 ---
+2025-09-23 13:10:46 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501
+2025-09-23 13:10:49 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:49 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501.
+2025-09-23 13:10:49 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:10:49 - __main__ - INFO - Waiting for 3.66 seconds...
+2025-09-23 13:10:53 - __main__ - INFO - --- Processing URL 11/1049: https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501 ---
+2025-09-23 13:10:53 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501
+2025-09-23 13:10:58 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:10:58 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501.
+2025-09-23 13:10:58 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:10:58 - __main__ - INFO - Waiting for 3.50 seconds...
+2025-09-23 13:11:01 - __main__ - INFO - --- Processing URL 12/1049: https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:01 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501
+2025-09-23 13:11:04 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:04 - __main__ - DEBUG - Clicked element 1/2.
+2025-09-23 13:11:05 - __main__ - DEBUG - Clicked element 2/2.
+2025-09-23 13:11:06 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501.
+2025-09-23 13:11:06 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:06 - __main__ - INFO - Waiting for 2.54 seconds...
+2025-09-23 13:11:08 - __main__ - INFO - --- Processing URL 13/1049: https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:08 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501
+2025-09-23 13:11:13 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:13 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501.
+2025-09-23 13:11:13 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:13 - __main__ - INFO - Waiting for 3.74 seconds...
+2025-09-23 13:11:17 - __main__ - INFO - --- Processing URL 14/1049: https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:17 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501
+2025-09-23 13:11:22 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:22 - __main__ - DEBUG - Clicked element 1/3.
+2025-09-23 13:11:23 - __main__ - DEBUG - Clicked element 2/3.
+2025-09-23 13:11:24 - __main__ - DEBUG - Clicked element 3/3.
+2025-09-23 13:11:24 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501.
+2025-09-23 13:11:24 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:24 - __main__ - INFO - Waiting for 2.66 seconds...
+2025-09-23 13:11:27 - __main__ - INFO - --- Processing URL 15/1049: https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:27 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501
+2025-09-23 13:11:32 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:32 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501.
+2025-09-23 13:11:32 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:32 - __main__ - INFO - Waiting for 3.60 seconds...
+2025-09-23 13:11:36 - __main__ - INFO - --- Processing URL 16/1049: https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:36 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501
+2025-09-23 13:11:42 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:42 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501.
+2025-09-23 13:11:42 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:42 - __main__ - INFO - Waiting for 2.64 seconds...
+2025-09-23 13:11:44 - __main__ - INFO - --- Processing URL 17/1049: https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:44 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501
+2025-09-23 13:11:48 - __main__ - INFO - Expanding page content by clicking zippy containers...
+2025-09-23 13:11:48 - __main__ - INFO - Successfully extracted HTML content from https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501.
+2025-09-23 13:11:48 - __main__ - DEBUG - Page and context for https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501 closed.
+2025-09-23 13:11:48 - __main__ - INFO - Waiting for 3.82 seconds...
+2025-09-23 13:11:52 - __main__ - INFO - --- Processing URL 18/1049: https://support.google.com/youtube/answer/11039077?hl=en&ref_topic=9257501 ---
+2025-09-23 13:11:52 - __main__ - INFO - Scraping page: https://support.google.com/youtube/answer/11039077?hl=en&ref_topic=9257501
+2025-09-23 13:12:45 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-140' coro=<BrowserContext.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_browser_context.py:588> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-09-23 13:12:45 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-139' coro=<Page.goto() done, defined at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:549> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111, ProtocolCallback.__init__.<locals>.cb() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:228]>
+2025-09-23 13:12:45 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-141' coro=<Browser.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_browser.py:232> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-09-23 13:14:14 - __main__ - INFO - --- Step 5: Starting HTML Chunking and Saving ---
+2025-09-23 13:14:14 - __main__ - INFO - Running in 'development' environment.
+2025-09-23 13:14:14 - __main__ - INFO - Using input storage: 'SQLiteStorageStrategy'
+2025-09-23 13:14:14 - __main__ - INFO - Using output storage: 'LocalStorageStrategy'
+2025-09-23 13:14:14 - __main__ - CRITICAL - An unexpected critical error occurred: too many values to unpack (expected 3)
+Traceback (most recent call last):
+  File "/Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/step5_split_into_chunks_and_save/run.py", line 173, in execute
+    for category, url, html_content in page_iterator:
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 3)
+2025-09-23 13:14:14 - __main__ - INFO - --- Step 5: Finished with errors ---
+2025-09-23 13:14:58 - __main__ - INFO - --- Step 5: Starting HTML Chunking and Saving ---
+2025-09-23 13:14:58 - __main__ - INFO - Running in 'development' environment.
+2025-09-23 13:14:58 - __main__ - INFO - Using input storage: 'SQLiteStorageStrategy'
+2025-09-23 13:14:58 - __main__ - INFO - Using output storage: 'LocalStorageStrategy'
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 1: https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 2: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 3: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 4: https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 5: https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 6: https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 7: https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 15 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 8: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 9: https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 10: https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 11: https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 8 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 12: https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 13: https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 14: https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processing page 15: https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501
+2025-09-23 13:14:58 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:14:58 - __main__ - INFO - Processed 15 pages and generated a total of 75 chunks.
+2025-09-23 13:14:58 - __main__ - INFO - Preparing to save chunks to 'chunks.json'...
+2025-09-23 13:14:58 - __main__ - INFO - Successfully saved all chunks to 'chunks.json'.
+2025-09-23 13:14:58 - __main__ - INFO - --- Step 5: Finished successfully ---
+2025-09-23 13:49:12 - __main__ - INFO - --- Step 5: Starting HTML Chunking and Saving ---
+2025-09-23 13:49:12 - __main__ - INFO - Running in 'development' environment.
+2025-09-23 13:49:12 - __main__ - INFO - Using input storage: 'SQLiteStorageStrategy'
+2025-09-23 13:49:12 - __main__ - INFO - Using output storage: 'LocalStorageStrategy'
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 1: https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 2: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 3: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 4: https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 5: https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 6: https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 7: https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 15 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 8: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 9: https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 10: https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 11: https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 8 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 12: https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 13: https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 14: https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processing page 15: https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501
+2025-09-23 13:49:12 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-23 13:49:12 - __main__ - INFO - Processed 15 pages and generated a total of 75 chunks.
+2025-09-23 13:49:12 - __main__ - INFO - Preparing to save chunks to 'chunks.json'...
+2025-09-23 13:49:12 - __main__ - INFO - Successfully saved all chunks to 'chunks.json'.
+2025-09-23 13:49:12 - __main__ - INFO - --- Step 5: Finished successfully ---

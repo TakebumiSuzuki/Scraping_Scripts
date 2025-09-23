@@ -170,7 +170,7 @@ def execute():
         # 3. イテレータを使って全ページをメモリ効率よく処理
         page_iterator = input_storage.get_storage_iterator()
 
-        for category, url, html_content in page_iterator:
+        for category, url, html_content, scraped_at in page_iterator:
             page_count += 1
             logger.info(f"Processing page {page_count}: {url}")
 
