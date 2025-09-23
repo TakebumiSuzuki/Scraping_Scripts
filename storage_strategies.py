@@ -2,6 +2,8 @@ import io
 import pathlib
 from abc import ABC, abstractmethod
 import sqlite3
+from collections.abc import Iterator #これはコード内で戻り値に対しイテレーター型を型表記で使うため
+
 class StorageError(Exception):
     pass
 class StorageFileNotFoundError(StorageError):
@@ -30,13 +32,21 @@ class StorageStrategy(ABC):
         """Checks if a file exists in the storage."""
         pass
 
+    @abstractmethod
+    def get_storage_iterator(self) -> Iterator[tuple]:
+        """
+        Returns an iterator that yields all stored items one by one.
+        Each item should be a tuple, e.g., (category, url, content).
+        """
+        pass
+
 # --- Concrete Strategy for Local Storage ---
 class LocalStorageStrategy(StorageStrategy):
     """Saves the content to a local file."""
     def __init__(self, local_storage_path: pathlib.Path):
         self.local_storage_path = local_storage_path
 
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         try:
             full_path = self.local_storage_path / filename
             print(f"Using LocalStorageStrategy to save to: '{full_path}'")
@@ -105,6 +115,12 @@ class LocalStorageStrategy(StorageStrategy):
             print(f"An OS error occurred while checking existence: {e}")
             return False
 
+    # ★インターフェースを実装するが、このクラスの責務ではないためNotImplementedErrorを発生させる
+    def get_storage_iterator(self) -> Iterator[tuple]:
+        raise NotImplementedError(
+            "LocalStorageStrategy for simple files does not support iterating over structured page data."
+        )
+
 
 
 # --- Concrete Strategy for GCS ---
@@ -116,7 +132,7 @@ class GCSStorageStrategy(StorageStrategy):
         self.bucket_name = bucket_name # For demonstration
         print(f"Using GCSStorageStrategy. Target bucket: '{self.bucket_name}'")
 
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         # NOTE: This is a placeholder for the actual GCS upload logic.
         # You would uncomment the lines in __init__ and implement the upload here.
         # blob = self.bucket.blob(filename)
@@ -149,38 +165,45 @@ class GCSStorageStrategy(StorageStrategy):
         print(f"GCSStorage: Checking existence of '{filename}'. (Simulated)")
         return True # シミュレーション
 
+    def get_storage_iterator(self) -> Iterator[tuple]:
+        """
+        [Simulation] In a real scenario, this would use `bucket.list_blobs()`
+        to iterate through all stored HTML files and download them one by one.
+        """
+        print("GCSStorage: Streaming all pages from bucket. (Simulated)")
+        # ダミーデータをyieldで返す
+        dummy_pages = [
+            ("GCS Category 1", "https://example.com/gcs/page1", "<h1>GCS Page 1</h1><p>Content here.</p>"),
+            ("GCS Category 2", "https://example.com/gcs/page2", "<h1>GCS Page 2</h1><p>More content.</p><div><img src='...' /></div>"),
+            ("GCS Category 1", "https://example.com/gcs/page3", "<h1>GCS Page 3</h1><h2>Subtitle</h2><p>Final text.</p>"),
+        ]
+        for page_data in dummy_pages:
+            yield page_data
+
 
 class SQLiteStorageStrategy(StorageStrategy):
     """Saves and reads content to/from a local SQLite database."""
-
     def __init__(self, db_path: pathlib.Path):
-        """
-        Initializes the SQLite storage strategy.
-
-        Args:
-            db_path: The path to the SQLite database file.
-        """
         self.db_path = db_path
         self._conn = None
         try:
-            # データベースファイルが置かれるディレクトリを作成
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
             self._create_table()
         except sqlite3.OperationalError as e:
-            # ディレクトリのパーミッションがない、ディスクが書き込み不可などの場合に発生
             raise StoragePermissionError(f"Could not connect to or create database at '{self.db_path}': {e}") from e
         except OSError as e:
-            # mkdirでOSレベルのエラーが発生した場合
             raise StoragePermissionError(f"Could not create directory for database at '{self.db_path.parent}': {e}") from e
 
-
     def _create_table(self):
-        """Ensures the 'pages' table exists in the database."""
+        """Ensures the table exists with the required schema."""
+        # ★ご要望のスキーマ + scraped_at に更新
         create_table_sql = """
-        CREATE TABLE IF NOT EXISTS pages (
-            url TEXT PRIMARY KEY,
-            html_content TEXT NOT NULL,
+        CREATE TABLE IF NOT EXISTS scraped_pages (
+            id INTEGER PRIMARY KEY,
+            category TEXT,
+            reference_url TEXT UNIQUE NOT NULL,
+            content TEXT,
             scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
         );
         """
@@ -191,41 +214,44 @@ class SQLiteStorageStrategy(StorageStrategy):
         except sqlite3.Error as e:
             raise StorageError(f"Failed to create table in database '{self.db_path}': {e}") from e
 
-
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         """
-        Saves HTML content to the database. The filename is used as the URL.
-        If the URL already exists, its content and timestamp are updated.
+        Saves content to the database.
+        Uses 'filename' as the URL and extracts 'category' from metadata.
+        If the URL already exists, it updates the existing record.
         """
         html_content = string_io.getvalue()
-        url = filename # このコンテキストではfilenameがURLとなる
+        url = filename
+        category = metadata.get('category', '') if metadata else ''
 
-        # INSERT OR REPLACE は、主キー(url)が既存の場合はUPDATE、存在しない場合はINSERTを実行します。
+        # reference_urlがUNIQUE制約を持つため、ON CONFLICTでUPDATEする
         sql = """
-        INSERT OR REPLACE INTO pages (url, html_content, scraped_at)
-        VALUES (?, ?, CURRENT_TIMESTAMP);
+        INSERT INTO scraped_pages (reference_url, category, content, scraped_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(reference_url) DO UPDATE SET
+            category=excluded.category,
+            content=excluded.content,
+            scraped_at=excluded.scraped_at;
         """
         try:
-            print(f"Using SQLiteStorageStrategy to save URL: '{url}'")
+            print(f"Using SQLiteStorageStrategy to save URL: '{url}' with category: '{category}'")
             cursor = self._conn.cursor()
-            cursor.execute(sql, (url, html_content))
+            cursor.execute(sql, (url, category, html_content))
             self._conn.commit()
             print(f"Successfully saved/updated '{url}' in '{self.db_path}'.")
         except sqlite3.Error as e:
             self._conn.rollback()
             raise StorageError(f"Failed to save to SQLite database: {e}") from e
 
-
     def read(self, filename: str) -> io.StringIO:
         """Reads HTML content from the database using the URL as a key."""
         url = filename
-        sql = "SELECT html_content FROM pages WHERE url = ?;"
+        sql = "SELECT content FROM scraped_pages WHERE reference_url = ?;"
         try:
             print(f"SQLiteStorage: Reading '{url}'.")
             cursor = self._conn.cursor()
             cursor.execute(sql, (url,))
-            result = cursor.fetchone() # (html_content,) というタプル or None
-
+            result = cursor.fetchone()
             if result:
                 return io.StringIO(result[0])
             else:
@@ -233,19 +259,15 @@ class SQLiteStorageStrategy(StorageStrategy):
         except sqlite3.Error as e:
             raise StorageError(f"Failed to read from SQLite database: {e}") from e
 
-
     def exists(self, filename: str) -> bool:
         """Checks if a record for the given URL exists in the database."""
         url = filename
-        # 存在確認は COUNT(*) よりも SELECT 1 の方が一般的に高速です
-        sql = "SELECT 1 FROM pages WHERE url = ?;"
+        sql = "SELECT 1 FROM scraped_pages WHERE reference_url = ?;"
         try:
             cursor = self._conn.cursor()
             cursor.execute(sql, (url,))
-            result = cursor.fetchone()
-            return result is not None
+            return cursor.fetchone() is not None
         except sqlite3.Error as e:
-            # エラー発生時は「存在しない」として扱う方が安全な場合が多い
             print(f"An error occurred while checking existence in SQLite: {e}")
             return False
 
@@ -255,6 +277,40 @@ class SQLiteStorageStrategy(StorageStrategy):
             self._conn.close()
             self._conn = None
             print(f"SQLite connection to '{self.db_path}' closed.")
+
+    # ★SQLite用のイテレータを実装
+    def get_storage_iterator(self) -> Iterator[tuple]:
+        """
+        Connects to the database and yields all pages one by one to save memory.
+        The connection is managed within this generator.
+        """
+        if not self.db_path.exists():
+            raise StorageFileNotFoundError(f"Database file not found: {self.db_path}")
+
+        conn = None
+        # ここで with は使えない。なぜなら、sqlite3 でのwithは、トランザクションの管理を自動的に行ってくれるためのものなので。
+        try:
+            conn = sqlite3.connect(self.db_path)
+            #  SQLiteのデータベース内では、TEXT 型のデータは特定のエンコーディング（通常はUTF-8）のバイト列として保存されています。
+            # スクレイピングで取得したHTMLデータには、さまざまな理由（文字化け、不正な文字コードの混入など）で、UTF-8として正しくデコードできないバイト列が含まれていることがよくあり
+            #conn.text_factory は、この「バイト列 → 文字列」の変換ルールをプログラマが自由にカスタマイズできる機能
+            # バイト列 b を（デフォルトのUTF-8で）デコードしなさい。
+            # ただし、もしデコードできない不正なバイトが見つかっても、エラーを発生させるのではなく、その不正なバイトを просто無視（ignore）して処理を続けてください。
+            conn.text_factory = lambda b: b.decode(errors='ignore')
+            cursor = conn.cursor()
+            query = "SELECT category, reference_url, content, scraped_at FROM scraped_pages ORDER BY id"
+
+            print(f"SQLiteStorage: Streaming pages from '{self.db_path}'...")
+            cursor.execute(query)
+
+            for row in cursor:
+                yield row # (category, reference_url, content)
+
+        except sqlite3.Error as e:
+            raise StorageError(f"Failed to stream from SQLite database: {e}") from e
+        finally:
+            if conn:
+                conn.close()
 
 
 # --- Factory Function ---
