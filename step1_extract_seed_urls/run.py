@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 # --- Configuration Constants ---
 APP_ENV = config.APP_ENV
-LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
-GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 DEFAULT_FILENAME = config.STEP1_OUTPUT_FILENAME
 USER_AGENTS = config.USER_AGENTS
@@ -65,7 +63,7 @@ def _fetch_urls(p: Playwright, target_url: str, base_url: str, timeout: int, use
 
 # execute関数 は TARGET_URL や、BASE_URL などのコンテキスト、つまりモジュールのグローバル定数を知っているという丁で関数を書く。
 # しかし、それと同時に、これらを外部から一時的に変更できるような設計にもしたいので、デフォルト値としてこれら定数を注入するようにする。
-def execute(target_url: str = TARGET_URL, base_url: str = BASE_URL):
+def execute(output_dir, target_url: str = TARGET_URL, base_url: str = BASE_URL):
     """
     The main execution function. It fetches URLs and saves them
     using a storage strategy determined by the environment.
@@ -73,12 +71,7 @@ def execute(target_url: str = TARGET_URL, base_url: str = BASE_URL):
     logger.info("--- Step 1: Starting Seed URLs Extraction ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    # Get the storage strategy based on the current environment
-    app_config = {
-        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
-        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-    }
-    storage_saver = get_storage_strategy(APP_ENV, app_config)
+    storage_saver = get_storage_strategy(APP_ENV, output_dir)
     logger.info(f"Using storage strategy: '{storage_saver.__class__.__name__}'")
 
     try:
@@ -124,4 +117,4 @@ def execute(target_url: str = TARGET_URL, base_url: str = BASE_URL):
 
 if __name__ == "__main__":
     setup_logging()
-    execute()
+    execute(output_dir='outputs/test')

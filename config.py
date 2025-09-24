@@ -7,7 +7,7 @@ APP_ENV = os.environ.get('APP_ENV', 'development')
 # You can add other configurations here later.
 GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'your-gcs-bucket-name')
 
-LOCAL_STORAGE_DIR = 'outputs'
+# LOCAL_STORAGE_DIR = 'outputs'
 
 # Timeout for network requests in seconds.
 # We get it from environment variables to allow easy overrides.

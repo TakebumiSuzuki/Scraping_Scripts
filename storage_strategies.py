@@ -3,6 +3,7 @@ import pathlib
 from abc import ABC, abstractmethod
 import sqlite3
 from collections.abc import Iterator #これはコード内で戻り値に対しイテレーター型を型表記で使うため
+from config import GCS_BUCKET_NAME
 
 class StorageError(Exception):
     pass
@@ -126,11 +127,10 @@ class LocalStorageStrategy(StorageStrategy):
 # --- Concrete Strategy for GCS ---
 class GCSStorageStrategy(StorageStrategy):
     """Saves the content to a Google Cloud Storage bucket."""
-    def __init__(self, bucket_name: str):
+    def __init__(self, gcs_path_prefix: str):
         # self.client = storage.Client()
-        # self.bucket = self.client.bucket(bucket_name)
-        self.bucket_name = bucket_name # For demonstration
-        print(f"Using GCSStorageStrategy. Target bucket: '{self.bucket_name}'")
+        self.gcs_path_prefix = gcs_path_prefix
+        print(f"Using GCSStorageStrategy. Target prefix: '{self.gcs_path_prefix}'")
 
     def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         # NOTE: This is a placeholder for the actual GCS upload logic.
@@ -139,7 +139,7 @@ class GCSStorageStrategy(StorageStrategy):
         csv_content = string_io.getvalue()
         # blob.upload_from_string(csv_content, content_type='text/csv')
 
-        print(f"Successfully uploaded '{filename}' to GCS bucket '{self.bucket_name}'.")
+        print(f"Successfully uploaded '{filename}' to GCS prefix '{self.gcs_path_prefix}'.")
         print("(This is a simulation. Actual GCS upload is commented out.)")
 
     def read(self, filename: str) -> io.StringIO:
@@ -323,26 +323,29 @@ class SQLiteStorageStrategy(StorageStrategy):
 
 
 # --- Factory Function ---
-def get_storage_strategy(
-    env: str,
-    config: dict,
-    step_context: str = 'default' # デフォルト値を設定
-) -> StorageStrategy:
+def get_storage_strategy(env: str, output_dir: str, step_context: str = 'default') -> StorageStrategy:
     """
     Factory function to select the appropriate storage strategy.
     """
+
     if env == 'production':
-        # 本番は常にGCSなので変更なし
-        return GCSStorageStrategy(bucket_name=config['GCS_BUCKET_NAME'])
+        # 本番環境ではバケット名とrun_idを組み合わせてパスプレフィックスを作る
+        # GCSStorageStrategyのコンストラクタも修正が必要
+        gcs_path_prefix = f"{GCS_BUCKET_NAME}/{output_dir}"
+        return GCSStorageStrategy(gcs_path_prefix=gcs_path_prefix) # bucket_name から変更
 
     # --- 開発環境の場合の分岐 ---
+    # ベースとなるディレクトリパスを最初に組み立てる
+    # 例: 'outputs/20250924_103055_123456'
+    project_root = pathlib.Path(__file__).parent
+    run_output_dir = project_root / output_dir
+
     if step_context == 'step4':
-        # step4の開発環境ではSQLiteを使う
-        project_root = pathlib.Path(__file__).parent
-        db_path = project_root / config['LOCAL_STORAGE_DIR'] / 'scraped_data.sqlite'
+        # SQLiteの場合、ファイル名を指定
+        # 例: 'outputs/20250924_.../scraped_data.sqlite'
+        db_path = run_output_dir / 'scraped_data.sqlite'
         return SQLiteStorageStrategy(db_path=db_path)
     else:
-        # それ以外のステップ(step1-3)では、従来通りローカルファイルシステムを使う
-        project_root = pathlib.Path(__file__).parent
-        local_storage_path = project_root / config['LOCAL_STORAGE_DIR']
-        return LocalStorageStrategy(local_storage_path=local_storage_path)
+        # ローカルファイルストレージの場合、ディレクトリをそのまま渡す
+        # 例: 'outputs/20250924_...'
+        return LocalStorageStrategy(local_storage_path=run_output_dir)

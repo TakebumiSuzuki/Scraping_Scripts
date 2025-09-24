@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
-LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
@@ -30,16 +29,12 @@ def remove_duplicate_rows_by_url(rows):
     return list(reversed(unique_rows))
 
 
-def execute():
+def execute(output_dir):
 
     logger.info("--- Step 3: Removing Duplicate URLs and Saving the unique URLs List ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    app_config = {
-        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
-        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-    }
-    storage = get_storage_strategy(APP_ENV, app_config)
+    storage = get_storage_strategy(APP_ENV, output_dir)
 
     try:
         logger.info(f"Loading URLs from '{STEP2_FILENAME}'...")
@@ -79,4 +74,4 @@ def execute():
 
 if __name__ == "__main__":
     setup_logging()
-    execute()
+    execute(output_dir='outputs/test')

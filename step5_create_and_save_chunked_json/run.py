@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 # --- 設定値の読み込み (config.pyから) ---
 APP_ENV = config.APP_ENV
-LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 CHUNK_MIN_LENGTH = config.CHUNK_MIN_LENGTH
@@ -142,22 +141,17 @@ def add_metadata_and_finalize(chunks: list[str], url: str, category: str, scrape
 
 
 
-def execute():
+def execute(output_dir):
     """Main execution function for step 5."""
     logger.info("--- Step 5: Starting HTML Chunking and Saving ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
     try:
-        # 1. 入力ストレージ戦略を取得 (step4のコンテキストを指定)
-        config_dict = {
-            'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
-            'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-        }
-        input_storage = get_storage_strategy(APP_ENV, config_dict, step_context='step4')
+        input_storage = get_storage_strategy(APP_ENV, output_dir, step_context='step4')
         logger.info(f"Using input storage: '{input_storage.__class__.__name__}'")
 
         # 出力ストレージ戦略を取得 (step5のコンテキスト = デフォルト)
-        output_storage = get_storage_strategy(APP_ENV, config_dict)
+        output_storage = get_storage_strategy(APP_ENV, output_dir)
         logger.info(f"Using output storage: '{output_storage.__class__.__name__}'")
 
         # 2. html2textコンバータを初期化
@@ -218,4 +212,4 @@ def execute():
 
 if __name__ == "__main__":
     setup_logging()
-    execute()
+    execute(output_dir='outputs/test')

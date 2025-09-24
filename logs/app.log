@@ -13469,3 +13469,37 @@ Call log:
 2025-09-24 10:07:25 - __main__ - INFO - Preparing to save chunks to 'chunks.json'...
 2025-09-24 10:07:25 - __main__ - INFO - Successfully saved all chunks to 'chunks.json'.
 2025-09-24 10:07:25 - __main__ - INFO - --- Step 5: Finished successfully ---
+2025-09-24 13:42:17 - __main__ - INFO - --- Step 1: Starting Seed URLs Extraction ---
+2025-09-24 13:42:17 - __main__ - INFO - Running in 'development' environment.
+2025-09-24 13:42:17 - __main__ - INFO - Using storage strategy: 'LocalStorageStrategy'
+2025-09-24 13:42:17 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-09-24 13:42:18 - __main__ - DEBUG - Launching browser with user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+2025-09-24 13:42:20 - __main__ - INFO - Navigating to page: https://support.google.com/youtube#topic=
+2025-09-24 13:42:22 - __main__ - INFO - Waiting for container element: 'article.article nav.accordion-homepage'
+2025-09-24 13:42:22 - __main__ - INFO - Querying for link elements: 'article.article nav.accordion-homepage a'
+2025-09-24 13:42:22 - __main__ - DEBUG - Found 57 link elements.
+2025-09-24 13:42:23 - __main__ - INFO - Closing browser context.
+2025-09-24 13:42:23 - __main__ - INFO - Successfully extracted a total of 57 URLs.
+2025-09-24 13:42:23 - __main__ - INFO - Preparing extracted URLs for CSV conversion...
+2025-09-24 13:42:23 - __main__ - INFO - Converting extracted URLs to in-memory CSV buffer...
+2025-09-24 13:42:23 - __main__ - INFO - In-memory CSV buffer created successfully.
+2025-09-24 13:42:23 - __main__ - INFO - Attempting to save URLs to 'seed_urls_list.csv'...
+2025-09-24 13:42:23 - __main__ - INFO - Successfully saved URLs to 'seed_urls_list.csv'.
+2025-09-24 13:42:23 - __main__ - INFO - --- Step 1: Finished successfully ---
+2025-09-24 13:43:25 - __main__ - INFO - --- Step 1: Starting Seed URLs Extraction ---
+2025-09-24 13:43:25 - __main__ - INFO - Running in 'development' environment.
+2025-09-24 13:43:25 - __main__ - INFO - Using storage strategy: 'LocalStorageStrategy'
+2025-09-24 13:43:25 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-09-24 13:43:26 - __main__ - DEBUG - Launching browser with user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15'
+2025-09-24 13:43:26 - __main__ - INFO - Navigating to page: https://support.google.com/youtube#topic=
+2025-09-24 13:43:29 - __main__ - INFO - Waiting for container element: 'article.article nav.accordion-homepage'
+2025-09-24 13:43:29 - __main__ - INFO - Querying for link elements: 'article.article nav.accordion-homepage a'
+2025-09-24 13:43:29 - __main__ - DEBUG - Found 57 link elements.
+2025-09-24 13:43:30 - __main__ - INFO - Closing browser context.
+2025-09-24 13:43:30 - __main__ - INFO - Successfully extracted a total of 57 URLs.
+2025-09-24 13:43:30 - __main__ - INFO - Preparing extracted URLs for CSV conversion...
+2025-09-24 13:43:30 - __main__ - INFO - Converting extracted URLs to in-memory CSV buffer...
+2025-09-24 13:43:30 - __main__ - INFO - In-memory CSV buffer created successfully.
+2025-09-24 13:43:30 - __main__ - INFO - Attempting to save URLs to 'seed_urls_list.csv'...
+2025-09-24 13:43:30 - __main__ - INFO - Successfully saved URLs to 'seed_urls_list.csv'.
+2025-09-24 13:43:30 - __main__ - INFO - --- Step 1: Finished successfully ---

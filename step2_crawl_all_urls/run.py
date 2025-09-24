@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
-LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
@@ -164,15 +163,12 @@ class Crawler:
             page.close()
 
 
-def execute() -> None:
+def execute(output_dir) -> None:
     """Main execution function for step 2."""
     logger.info("--- Step 2: Starting Recursive URL Crawling ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    storage = get_storage_strategy(APP_ENV, {
-        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
-        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-    })
+    storage = get_storage_strategy(APP_ENV, output_dir)
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
     try:
@@ -226,4 +222,4 @@ def execute() -> None:
 
 if __name__ == "__main__":
     setup_logging()
-    execute()
+    execute(output_dir='outputs/test')

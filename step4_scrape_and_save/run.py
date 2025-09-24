@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 # --- Configuration Constants ---
 APP_ENV = config.APP_ENV
-LOCAL_STORAGE_DIR = config.LOCAL_STORAGE_DIR
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
@@ -78,17 +77,13 @@ class Scraper:
             logger.debug(f"Page and context for {url} closed.")
 
 
-def execute() -> None:
+def execute(output_dir) -> None:
     """Main execution function for step 4."""
     logger.info("--- Step 4: Starting Scrape and Save HTML ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    config_dict = {
-        'LOCAL_STORAGE_DIR': LOCAL_STORAGE_DIR,
-        'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
-    }
-    input_storage = get_storage_strategy(APP_ENV, config_dict)
-    output_storage = get_storage_strategy(APP_ENV, config_dict, step_context='step4')
+    input_storage = get_storage_strategy(APP_ENV, output_dir)
+    output_storage = get_storage_strategy(APP_ENV, output_dir, step_context='step4')
 
     logger.info(f"Input Storage: '{input_storage.__class__.__name__}'")
     logger.info(f"Output Storage: '{output_storage.__class__.__name__}'")
@@ -178,4 +173,4 @@ def execute() -> None:
 
 if __name__ == "__main__":
     setup_logging()
-    execute()
+    execute(output_dir='outputs/test')
