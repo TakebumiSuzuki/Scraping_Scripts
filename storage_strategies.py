@@ -232,6 +232,8 @@ class SQLiteStorageStrategy(StorageStrategy):
 
         # reference_urlがUNIQUE制約を持つため、ON CONFLICTでUPDATEする
         # ON CONFLICT構文を使うことにより、一つのSQLクエリでアトミックに upseart 作業が行える。　
+        # CURRENT_TIMESTAMP はSQLite側で実行される関数であり、UTC（協定世界時）で日時を保存します。
+        # SQLite自体には専用の日時型がなく、TIMESTAMPとしてテーブルを定義しても、文字列として扱います。
         sql = """
         INSERT INTO scraped_pages (reference_url, category, content, scraped_at)
         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
@@ -337,7 +339,7 @@ def get_storage_strategy(
     if step_context == 'step4':
         # step4の開発環境ではSQLiteを使う
         project_root = pathlib.Path(__file__).parent
-        db_path = project_root / config['LOCAL_STORAGE_DIR'] / 'scraped_pages.sqlite'
+        db_path = project_root / config['LOCAL_STORAGE_DIR'] / 'scraped_data.sqlite'
         return SQLiteStorageStrategy(db_path=db_path)
     else:
         # それ以外のステップ(step1-3)では、従来通りローカルファイルシステムを使う

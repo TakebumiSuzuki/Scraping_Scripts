@@ -79,3 +79,7 @@ Desktop.ini
 # JetBrains (PyCharm, IntelliJ)
 .idea/
 *.iml
+
+
+
+*.sqlite
