@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
-GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
 STEP1_OUTPUT_FILENAME = config.STEP1_OUTPUT_FILENAME
@@ -45,12 +44,11 @@ class Crawler:
         self.browser = self.playwright.chromium.launch(headless=True)
         self.context = self.browser.new_context(user_agent=random.choice(self.user_agents))
         logger.info("Crawler initialized: Playwright started, Browser launched.")
-        return self # with ... as crawler: の crawler にこのインスタンス自身を返す
+        # with ... as crawler: の crawler にこのインスタンス自身を返す
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """withブロックを抜けるときに、エラーの有無に関わらず実行される"""
-        if self.context:
-            self.context.close()
         if self.browser:
             self.browser.close()
         if self.playwright:
@@ -74,9 +72,9 @@ class Crawler:
         full_url = urljoin(self.BASE_URL, original_url)
         parsed_url = urlparse(full_url)
         query = parsed_url.query
-        params = dict(p.split('=') for p in query.split('&')) if query else {}
-        params['hl'] = 'en'
-        new_query = '&'.join([f"{k}={v}" for k, v in params.items()])
+        params_dict = dict(p.split('=') for p in query.split('&')) if query else {}
+        params_dict['hl'] = 'en'
+        new_query = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
         return parsed_url._replace(query=new_query).geturl()
 
     def scrape_page(self, url: str, title: str = "", depth: int = 0) -> None:
@@ -85,10 +83,10 @@ class Crawler:
         ページの生成から破棄までを、このメソッド内で完結させる。
         """
         if depth > self.MAX_RECURSION_DEPTH:
-            # ...
+            logger.debug(
+            f"Max recursion depth ({self.MAX_RECURSION_DEPTH}) reached. Stopping crawl for this branch at URL: {url}")
             return
 
-        # ★ メソッドの最初に、自身が使うページを作成する
         page = self.context.new_page()
         logger.info(f"Scraping [Depth: {depth}]: {url}")
 
@@ -96,8 +94,8 @@ class Crawler:
             page.goto(url, timeout=self.timeout_ms, wait_until="networkidle")
             time.sleep(random.uniform(1, 2))
 
-            # locatorオブジェクト自体は「指示書」や「リモコン」のようなものですが、.count()や.all()のような
-            # 特定のメソッドを呼び出すと、その瞬間にPlaywrightはブラウザに問い合わせを行い、実際に要素の検索を実行する。
+            # locatorオブジェクト自体は「指示書」や「リモコン」のようなものだが、.count()や.all()のような特定のメソッドを
+            # 呼び出してしまうと、その瞬間にPlaywrightはブラウザに問い合わせを行い、実際に要素の検索を実行する。
             section = page.locator('section.topic-container')
             if section.count() == 0:
                 logger.warning(f"No 'section.topic-container' found on page: {url}. Assuming it's a leaf page.")

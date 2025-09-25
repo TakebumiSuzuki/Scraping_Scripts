@@ -6,6 +6,7 @@ APP_ENV = os.environ.get('APP_ENV', 'development')
 
 # You can add other configurations here later.
 GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'your-gcs-bucket-name')
+SQLITE_DB_FILENAME = "scraped_data.sqlite"
 
 # LOCAL_STORAGE_DIR = 'outputs'
 

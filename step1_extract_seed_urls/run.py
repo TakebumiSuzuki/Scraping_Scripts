@@ -36,7 +36,7 @@ def _fetch_urls(
     Navigates to a URL using Playwright and extracts a list of anchor hrefs.
     Converts relative URLs to absolute URLs.
     """
-    extracted_urls = []
+    extracted_absolute_urls = []
 
     logger.debug(f"Launching browser with user_agent: '{user_agent}'")
     browser = p.chromium.launch(headless=True)
@@ -61,13 +61,16 @@ def _fetch_urls(
             href = link_element.get_attribute("href")
             if href:
                 full_url = urljoin(base_url, href)
-                extracted_urls.append(full_url)
+                extracted_absolute_urls.append(full_url)
 
     finally:
         logger.info("Closing browser context.")
+        # browser.close() を呼び出すと、そのブラウザインスタンスが所有するすべてのブラウザコンテキスト (BrowserContext) が自動的に閉じられます。
+        # ブラウザコンテキストが閉じられると、そのコンテキストが所有するすべてのページ (Page) も自動的に閉じられます。
+        # よってここで page.close() を呼び出す必要はありません。
         browser.close()
 
-    return extracted_urls
+    return extracted_absolute_urls
 
 
 # execute関数 は ENTRY_URL や、BASE_URL などのコンテキスト、つまりモジュールのグローバル定数を知っているという丁で関数を書く。
@@ -80,8 +83,10 @@ def execute(
     link_selector: str = LINK_SELECTOR
 ):
     """
-    The main execution function. It fetches URLs and saves them
-    using a storage strategy determined by the environment.
+    Extracts all link URLs from a target web page and saves them to a CSV file.
+
+    This function uses a dynamically selected storage strategy (e.g., local file
+    or cloud storage) based on the application environment to persist the URLs.
     """
     logger.info("--- Step 1: Starting Seed URLs Extraction ---")
     logger.info(f"Running in '{APP_ENV}' environment.")

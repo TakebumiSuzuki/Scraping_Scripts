@@ -4,9 +4,12 @@ import pathlib
 from abc import ABC, abstractmethod
 import sqlite3
 from collections.abc import Iterator #これはコード内で戻り値に対しイテレーター型を型表記で使うため
-from config import GCS_BUCKET_NAME
+import config
 from google.cloud import storage
 from google.api_core import exceptions
+
+GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
+SQLITE_DB_FILENAME = config.SQLITE_DB_FILENAME
 
 class StorageError(Exception):
     pass
@@ -50,7 +53,7 @@ class LocalStorageStrategy(StorageStrategy):
     def __init__(self, local_storage_path: pathlib.Path):
         self.local_storage_path = local_storage_path
 
-    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
+    def save(self, string_io: io.StringIO, filename: str):
         try:
             full_path = self.local_storage_path / filename
             print(f"Using LocalStorageStrategy to save to: '{full_path}'")
@@ -151,17 +154,17 @@ class GCSStorageStrategy(StorageStrategy):
 
         print(f"Using GCSStorageStrategy. Target: 'gs://{self.bucket_name}/{self.gcs_path_prefix}'")
 
-    # save, read, exists, get_storage_iterator の各メソッドは
-    # 以前の提案から変更する必要はありません。
-    # 正しく分離された self.bucket_name と self.gcs_path_prefix を使って
-    # 既に正しく動作するためです。
 
-    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
+    def save(self, string_io: io.StringIO, filename: str):
         """Uploads the content of the string buffer to a GCS blob."""
         blob_name = os.path.join(self.gcs_path_prefix, filename)
         blob = self.bucket.blob(blob_name)
         try:
             csv_content = string_io.getvalue()
+            # content_type は、もともとHTTP通信で使われるMIMEタイプという規格に準拠しています。
+            # これをつけない場合、GCSはファイルの種類を推測できず、application/octet-stream（種類不明のバイナリデータ）や
+            # text/plain（ただのテキスト）といった汎用的なタイプを自動的に割り当ててしまいます。
+            # その結果、ブラウザでファイルを開いたときに、意図せずテキストがそのまま表示されてしまったりする。
             blob.upload_from_string(csv_content, content_type='text/csv')
             print(f"Successfully uploaded '{filename}' to 'gs://{self.bucket_name}/{blob_name}'.")
         except exceptions.Forbidden as e:
@@ -175,8 +178,9 @@ class GCSStorageStrategy(StorageStrategy):
         blob = self.bucket.blob(blob_name)
         print(f"GCSStorage: Reading 'gs://{self.bucket_name}/{blob_name}'.")
         try:
-            content_bytes = blob.download_as_bytes()
-            content_str = content_bytes.decode('utf-8')
+            content_str = blob.download_as_text(encoding='utf-8')
+            # content_bytes = blob.download_as_bytes()
+            # content_str = content_bytes.decode('utf-8')
             return io.StringIO(content_str)
         except exceptions.NotFound as e:
             raise StorageFileNotFoundError(f"File not found in GCS: gs://{self.bucket_name}/{blob_name}") from e
@@ -367,15 +371,15 @@ def get_storage_strategy(env: str, output_dir: str, step_context: str = 'default
     # --- 開発環境の場合の分岐 ---
     # ベースとなるディレクトリパスを最初に組み立てる
     # 例: 'outputs/20250924_103055_123456'
-    project_root = pathlib.Path(__file__).parent
-    run_output_dir = project_root / output_dir
+    project_root_dir = pathlib.Path(__file__).parent
+    full_output_dir = project_root_dir / output_dir
 
     if step_context == 'step4':
         # SQLiteの場合、ファイル名を指定
         # 例: 'outputs/20250924_.../scraped_data.sqlite'
-        db_path = run_output_dir / 'scraped_data.sqlite'
+        db_path = full_output_dir / SQLITE_DB_FILENAME
         return SQLiteStorageStrategy(db_path=db_path)
     else:
         # ローカルファイルストレージの場合、ディレクトリをそのまま渡す
         # 例: 'outputs/20250924_...'
-        return LocalStorageStrategy(local_storage_path=run_output_dir)
+        return LocalStorageStrategy(local_storage_path=full_output_dir)
