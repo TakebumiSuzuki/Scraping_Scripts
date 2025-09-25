@@ -1,9 +1,12 @@
+import os
 import io
 import pathlib
 from abc import ABC, abstractmethod
 import sqlite3
 from collections.abc import Iterator #これはコード内で戻り値に対しイテレーター型を型表記で使うため
 from config import GCS_BUCKET_NAME
+from google.cloud import storage
+from google.api_core import exceptions
 
 class StorageError(Exception):
     pass
@@ -127,43 +130,74 @@ class LocalStorageStrategy(StorageStrategy):
 # --- Concrete Strategy for GCS ---
 class GCSStorageStrategy(StorageStrategy):
     """Saves the content to a Google Cloud Storage bucket."""
-    def __init__(self, gcs_path_prefix: str):
-        # self.client = storage.Client()
-        self.gcs_path_prefix = gcs_path_prefix
-        print(f"Using GCSStorageStrategy. Target prefix: '{self.gcs_path_prefix}'")
+
+    def __init__(self, bucket_name: str, gcs_path_prefix: str):
+        """
+        Initializes the GCS strategy with a bucket name and a path prefix.
+        """
+        if not bucket_name:
+            raise ValueError("GCS bucket name cannot be empty.")
+
+        try:
+            self.client = storage.Client()
+            self.bucket = self.client.bucket(bucket_name)
+            self.bucket_name = bucket_name
+            self.gcs_path_prefix = gcs_path_prefix
+        except Exception as e:
+            raise StorageError(
+                "Failed to initialize Google Cloud Storage client. "
+                "Ensure you are authenticated (e.g., via 'gcloud auth application-default login')."
+            ) from e
+
+        print(f"Using GCSStorageStrategy. Target: 'gs://{self.bucket_name}/{self.gcs_path_prefix}'")
+
+    # save, read, exists, get_storage_iterator の各メソッドは
+    # 以前の提案から変更する必要はありません。
+    # 正しく分離された self.bucket_name と self.gcs_path_prefix を使って
+    # 既に正しく動作するためです。
 
     def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
-        # NOTE: This is a placeholder for the actual GCS upload logic.
-        # You would uncomment the lines in __init__ and implement the upload here.
-        # blob = self.bucket.blob(filename)
-        csv_content = string_io.getvalue()
-        # blob.upload_from_string(csv_content, content_type='text/csv')
-
-        print(f"Successfully uploaded '{filename}' to GCS prefix '{self.gcs_path_prefix}'.")
-        print("(This is a simulation. Actual GCS upload is commented out.)")
+        """Uploads the content of the string buffer to a GCS blob."""
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
+        try:
+            csv_content = string_io.getvalue()
+            blob.upload_from_string(csv_content, content_type='text/csv')
+            print(f"Successfully uploaded '{filename}' to 'gs://{self.bucket_name}/{blob_name}'.")
+        except exceptions.Forbidden as e:
+            raise StoragePermissionError(f"Permission denied to write to GCS path: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.GoogleAPICallError as e:
+            raise StorageError(f"A GCS API error occurred while saving '{blob_name}': {e}") from e
 
     def read(self, filename: str) -> io.StringIO:
-        print(f"GCSStorage: Downloading '{filename}'.")
-        # try:
-        #     blob = self.bucket.blob(filename)
-        #     content = blob.download_as_string().decode('utf-8')
-        #     return io.StringIO(content)
-        # except NotFound as e:
-        #     # GCSのNotFound例外を共通の例外に翻訳
-        #     raise StorageFileNotFoundError(f"File '{filename}' not found in GCS bucket '{self.bucket_name}'") from e
-        # except Forbidden as e:
-        #     # GCSのForbidden例外（権限エラー）を共通の例外に翻訳
-        #     raise StoragePermissionError(f"Permission denied for GCS file '{filename}'") from e
-
-        # --- シミュレーション用のダミーデータ ---
-        dummy_content = "url\nhttps://example.com/from/gcs"
-        return io.StringIO(dummy_content)
+        """Downloads a blob from GCS and returns its content as a string buffer."""
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
+        print(f"GCSStorage: Reading 'gs://{self.bucket_name}/{blob_name}'.")
+        try:
+            content_bytes = blob.download_as_bytes()
+            content_str = content_bytes.decode('utf-8')
+            return io.StringIO(content_str)
+        except exceptions.NotFound as e:
+            raise StorageFileNotFoundError(f"File not found in GCS: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.Forbidden as e:
+            raise StoragePermissionError(f"Permission denied to read from GCS path: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.GoogleAPICallError as e:
+            raise StorageError(f"A GCS API error occurred while reading '{blob_name}': {e}") from e
 
     def exists(self, filename: str) -> bool:
-        # blob = self.bucket.blob(filename)
-        # return blob.exists()
-        print(f"GCSStorage: Checking existence of '{filename}'. (Simulated)")
-        return True # シミュレーション
+        """Checks if a blob exists in the GCS bucket."""
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
+        print(f"GCSStorage: Checking existence of 'gs://{self.bucket_name}/{blob_name}'.")
+        try:
+            return blob.exists()
+        except exceptions.Forbidden as e:
+            print(f"Permission denied while checking existence of GCS object '{blob_name}': {e}")
+            return False
+        except exceptions.GoogleAPICallError as e:
+            print(f"A GCS API error occurred while checking existence of '{blob_name}': {e}")
+            return False
 
     def get_storage_iterator(self) -> Iterator[tuple]:
         """
@@ -329,11 +363,7 @@ def get_storage_strategy(env: str, output_dir: str, step_context: str = 'default
     """
 
     if env == 'production':
-        # 本番環境ではバケット名とrun_idを組み合わせてパスプレフィックスを作る
-        # GCSStorageStrategyのコンストラクタも修正が必要
-        gcs_path_prefix = f"{GCS_BUCKET_NAME}/{output_dir}"
-        return GCSStorageStrategy(gcs_path_prefix=gcs_path_prefix) # bucket_name から変更
-
+        return GCSStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
     # --- 開発環境の場合の分岐 ---
     # ベースとなるディレクトリパスを最初に組み立てる
     # 例: 'outputs/20250924_103055_123456'

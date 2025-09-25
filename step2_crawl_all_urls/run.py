@@ -17,8 +17,8 @@ APP_ENV = config.APP_ENV
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
-STEP1_FILENAME = config.STEP1_OUTPUT_FILENAME
-STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
+STEP1_OUTPUT_FILENAME = config.STEP1_OUTPUT_FILENAME
+STEP2_OUTPUT_FILENAME = config.STEP2_OUTPUT_FILENAME
 
 class Crawler:
     """
@@ -172,8 +172,8 @@ def execute(output_dir) -> None:
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
     try:
-        logger.info(f"Loading seed URLs from '{STEP1_FILENAME}'...")
-        string_io = storage.read(STEP1_FILENAME)
+        logger.info(f"Loading seed URLs from '{STEP1_OUTPUT_FILENAME}'...")
+        string_io = storage.read(STEP1_OUTPUT_FILENAME)
         reader = csv.reader(string_io)
         seed_urls = [row[0] for row in reader if row]
         if not seed_urls:
@@ -203,15 +203,16 @@ def execute(output_dir) -> None:
         rows_to_write = [[title, url] for article in all_articles for title, url in article.items()]
 
         logger.info("Converting articles to in-memory CSV buffer...")
-        output_io = convert_rows_to_in_memory_csv(rows_to_write) # 汎用関数を呼び出す
+        output_io = convert_rows_to_in_memory_csv(rows_to_write)
         logger.debug("In-memory CSV buffer created successfully.")
 
-        logger.info(f"Saving articles to '{STEP2_FILENAME}'...")
-        storage.save(output_io, STEP2_FILENAME)
+        logger.info(f"Saving articles to '{STEP2_OUTPUT_FILENAME}'...")
+        storage.save(output_io, STEP2_OUTPUT_FILENAME)
         logger.info(f"Successfully saved {len(all_articles)} articles.")
 
     except FileNotFoundError:
-        logger.critical(f"Input file '{STEP1_FILENAME}' not found. Please run Step 1 first.")
+        logger.critical(f"Input file '{STEP1_OUTPUT_FILENAME}' not found. Please run Step 1 first.")
+        return
     except Exception as e:
         logger.error(f"An unexpected error occurred during execution: {e}", exc_info=True)
         logger.info("--- Step 2: Finished with errors ---")
