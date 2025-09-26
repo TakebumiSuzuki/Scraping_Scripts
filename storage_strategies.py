@@ -7,6 +7,7 @@ from collections.abc import Iterator #これはコード内で戻り値に対し
 import config
 from google.cloud import storage
 from google.api_core import exceptions
+from datetime import datetime, timezone
 
 GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 SQLITE_DB_FILENAME = config.SQLITE_DB_FILENAME
@@ -25,7 +26,7 @@ class StoragePermissionError(StorageError):
 # --- Base Strategy Interface ---
 class StorageStrategy(ABC):
     @abstractmethod
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         """Saves content from a string buffer to the storage."""
         pass
 
@@ -53,7 +54,7 @@ class LocalStorageStrategy(StorageStrategy):
     def __init__(self, local_storage_path: pathlib.Path):
         self.local_storage_path = local_storage_path
 
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         try:
             full_path = self.local_storage_path / filename
             print(f"Using LocalStorageStrategy to save to: '{full_path}'")
@@ -131,7 +132,7 @@ class LocalStorageStrategy(StorageStrategy):
 
 
 # --- Concrete Strategy for GCS ---
-class GCSStorageStrategy(StorageStrategy):
+class GCSFileStorageStrategy(StorageStrategy):
     """Saves the content to a Google Cloud Storage bucket."""
 
     def __init__(self, bucket_name: str, gcs_path_prefix: str):
@@ -152,10 +153,10 @@ class GCSStorageStrategy(StorageStrategy):
                 "Ensure you are authenticated (e.g., via 'gcloud auth application-default login')."
             ) from e
 
-        print(f"Using GCSStorageStrategy. Target: 'gs://{self.bucket_name}/{self.gcs_path_prefix}'")
+        print(f"Using GCSFileStorageStrategy. Target: 'gs://{self.bucket_name}/{self.gcs_path_prefix}'")
 
 
-    def save(self, string_io: io.StringIO, filename: str):
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
         """Uploads the content of the string buffer to a GCS blob."""
         blob_name = os.path.join(self.gcs_path_prefix, filename)
         blob = self.bucket.blob(blob_name)
@@ -176,7 +177,7 @@ class GCSStorageStrategy(StorageStrategy):
         """Downloads a blob from GCS and returns its content as a string buffer."""
         blob_name = os.path.join(self.gcs_path_prefix, filename)
         blob = self.bucket.blob(blob_name)
-        print(f"GCSStorage: Reading 'gs://{self.bucket_name}/{blob_name}'.")
+        print(f"GCSFileStorage: Reading 'gs://{self.bucket_name}/{blob_name}'.")
         try:
             content_str = blob.download_as_text(encoding='utf-8')
             # content_bytes = blob.download_as_bytes()
@@ -193,7 +194,85 @@ class GCSStorageStrategy(StorageStrategy):
         """Checks if a blob exists in the GCS bucket."""
         blob_name = os.path.join(self.gcs_path_prefix, filename)
         blob = self.bucket.blob(blob_name)
-        print(f"GCSStorage: Checking existence of 'gs://{self.bucket_name}/{blob_name}'.")
+        print(f"GCSFileStorage: Checking existence of 'gs://{self.bucket_name}/{blob_name}'.")
+        try:
+            return blob.exists()
+        except exceptions.Forbidden as e:
+            print(f"Permission denied while checking existence of GCS object '{blob_name}': {e}")
+            return False
+        except exceptions.GoogleAPICallError as e:
+            print(f"A GCS API error occurred while checking existence of '{blob_name}': {e}")
+            return False
+
+
+    def get_storage_iterator(self) -> Iterator[tuple]:
+        raise NotImplementedError(
+            "GCSFileStorageStrategy for simple files does not support iterating over structured page data."
+        )
+
+
+class GCSPageStorageStrategy(StorageStrategy):
+    """
+    Saves and reads structured page data to/from GCS.
+    It behaves like a database, storing content with custom metadata.
+    """
+
+    def __init__(self, bucket_name: str, gcs_path_prefix: str):
+        if not bucket_name:
+            raise ValueError("GCS bucket name cannot be empty.")
+        try:
+            self.client = storage.Client()
+            self.bucket = self.client.bucket(bucket_name)
+            self.bucket_name = bucket_name
+            self.gcs_path_prefix = gcs_path_prefix
+        except Exception as e:
+            raise StorageError("Failed to initialize GCS client.") from e
+        print(f"Using GCSPageStorageStrategy. Target: 'gs://{self.bucket_name}/{self.gcs_path_prefix}'")
+
+    def save(self, string_io: io.StringIO, filename: str, metadata: dict | None = None):
+        """
+        Uploads content to a GCS blob, storing category and scraped_at
+        as custom metadata.
+        """
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
+
+        category = metadata.get('category', 'default') if metadata else 'default'
+        scraped_at = datetime.now(timezone.utc).isoformat()
+
+        blob.metadata = {
+            'category': category,
+            'scraped_at': scraped_at
+        }
+
+        try:
+            content = string_io.getvalue()
+            # HTMLを想定するため content_type を text/html にする
+            blob.upload_from_string(content, content_type='text/html')
+            print(f"Successfully uploaded page '{filename}' to 'gs://{self.bucket_name}/{blob_name}' with metadata.")
+        except exceptions.Forbidden as e:
+            raise StoragePermissionError(f"Permission denied to write to GCS path: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.GoogleAPICallError as e:
+            raise StorageError(f"A GCS API error occurred while saving '{blob_name}': {e}") from e
+
+    def read(self, filename: str) -> io.StringIO:
+        """Downloads a blob from GCS and returns its content."""
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
+        try:
+            content_str = blob.download_as_text(encoding='utf-8')
+            return io.StringIO(content_str)
+        except exceptions.NotFound as e:
+            raise StorageFileNotFoundError(f"File not found in GCS: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.Forbidden as e:
+            raise StoragePermissionError(f"Permission denied to read from GCS path: gs://{self.bucket_name}/{blob_name}") from e
+        except exceptions.GoogleAPICallError as e:
+            raise StorageError(f"A GCS API error occurred while reading '{blob_name}': {e}") from e
+
+    def exists(self, filename: str) -> bool:
+        """Checks if a blob exists in the GCS bucket."""
+        blob_name = os.path.join(self.gcs_path_prefix, filename)
+        blob = self.bucket.blob(blob_name)
         try:
             return blob.exists()
         except exceptions.Forbidden as e:
@@ -205,18 +284,33 @@ class GCSStorageStrategy(StorageStrategy):
 
     def get_storage_iterator(self) -> Iterator[tuple]:
         """
-        [Simulation] In a real scenario, this would use `bucket.list_blobs()`
-        to iterate through all stored HTML files and download them one by one.
+        Streams all stored pages from GCS memory-efficiently.
+        Reads category and scraped_at from custom metadata.
         """
-        print("GCSStorage: Streaming all pages from bucket. (Simulated)")
-        # ダミーデータをyieldで返す
-        dummy_pages = [
-            ("GCS Category 1", "https://example.com/gcs/page1", "<h1>GCS Page 1</h1><p>Content here.</p>"),
-            ("GCS Category 2", "https://example.com/gcs/page2", "<h1>GCS Page 2</h1><p>More content.</p><div><img src='...' /></div>"),
-            ("GCS Category 1", "https://example.com/gcs/page3", "<h1>GCS Page 3</h1><h2>Subtitle</h2><p>Final text.</p>"),
-        ]
-        for page_data in dummy_pages:
-            yield page_data
+        print(f"GCSPageStorage: Streaming pages from 'gs://{self.bucket_name}/{self.gcs_path_prefix}'...")
+        try:
+            for blob in self.bucket.list_blobs(prefix=self.gcs_path_prefix):
+                if blob.name.endswith('/'):
+                    continue
+
+                try:
+                    # メタデータを先に取得（なければ空の辞書）
+                    metadata = blob.metadata or {}
+                    category = metadata.get('category', 'unknown') # メタデータがない場合へのフォールバック
+                    reference_url = os.path.relpath(blob.name, self.gcs_path_prefix)
+                    content = blob.download_as_text(encoding='utf-8')
+                    scraped_at = metadata.get('scraped_at', blob.updated.isoformat()) # メタデータ優先
+
+                    yield (category, reference_url, content, scraped_at)
+
+                except exceptions.GoogleAPICallError as e:
+                    print(f"Warning: Failed to download or process blob 'gs://{self.bucket_name}/{blob.name}': {e}")
+                    continue
+
+        except exceptions.Forbidden as e:
+            raise StoragePermissionError(f"Permission denied to list GCS path: gs://{self.bucket_name}/{self.gcs_path_prefix}") from e
+        except exceptions.GoogleAPICallError as e:
+            raise StorageError(f"A GCS API error occurred while listing blobs: {e}") from e
 
 
 class SQLiteStorageStrategy(StorageStrategy):
@@ -351,7 +445,7 @@ class SQLiteStorageStrategy(StorageStrategy):
             cursor.execute(query)
 
             for row in cursor:
-                yield row # (category, reference_url, content)
+                yield row # (category, reference_url, content, scraped_at)
 
         except sqlite3.Error as e:
             raise StorageError(f"Failed to stream from SQLite database: {e}") from e
@@ -367,7 +461,12 @@ def get_storage_strategy(env: str, output_dir: str, step_context: str = 'default
     """
 
     if env == 'production':
-        return GCSStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
+        if step_context == 'step4': # step4ではページ保存用の戦略を返す
+            return GCSPageStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
+        else: # それ以外のステップでは単純ファイル用の戦略を返す
+            return GCSFileStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
+
+
     # --- 開発環境の場合の分岐 ---
     # ベースとなるディレクトリパスを最初に組み立てる
     # 例: 'outputs/20250924_103055_123456'

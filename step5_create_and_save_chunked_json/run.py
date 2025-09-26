@@ -1,5 +1,3 @@
-# step5_split_into_chunks_and_save/run.py
-
 import io
 import json
 import re
@@ -8,23 +6,16 @@ from uuid import uuid4
 from bs4 import BeautifulSoup
 import html2text
 
-# --- プロジェクトのルートパスをsys.pathに追加 ---
-# import sys
-# project_root = Path(__file__).resolve().parents[1]
-# sys.path.insert(0, str(project_root))
-# -----------------------------------------
-
 import config
 from storage_strategies import get_storage_strategy, StorageError
-from config_logging import setup_logging
 
 # --- Loggerの設定 ---
 import logging
+from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
 # --- 設定値の読み込み (config.pyから) ---
 APP_ENV = config.APP_ENV
-GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 CHUNK_MIN_LENGTH = config.CHUNK_MIN_LENGTH
 CHUNK_MAX_LENGTH = config.CHUNK_MAX_LENGTH
