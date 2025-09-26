@@ -10,22 +10,26 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
-GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
 
-def remove_duplicate_rows_by_url(rows):
+def _remove_duplicate_rows_by_url(rows):
+    """Removes duplicate rows based on the URL, keeping the last occurrence."""
     seen_urls = set()
     unique_rows = []
+    # reversed()はPythonの組み込み関数で、リストやタプルなどのシーケンス（順番を持つデータ構造）を
+    # 受け取り、その要素を逆順に取り出すイテレーターを返す。で、イテレーターの仕組み上、最初から順番にしか
+    # 取り出せないので、どうしても後ろの方のエントリーを優先的にキープするという仕様を貫くならば、
+    # 以下のような実装になり、イテレータによるメモリを節約するという方法は使えない。
     for row in reversed(rows):
         if len(row) > 1:
             url = row[1]
             if url not in seen_urls:
                 seen_urls.add(url)
-                unique_rows.append(row) # Claudeによると、大規模なcsvの場合メモリ節約のため、この部分をgeneratorにしてもいいとの事。
+                unique_rows.append(row)
             else:
-                logger.info(f'このurlは重複しているため、新しいファイルには含めません: {url}')
+                logger.info(f"Duplicate URL found, will not include in the new file: {url}")
     return list(reversed(unique_rows))
 
 
@@ -35,20 +39,20 @@ def execute(output_dir):
     logger.info(f"Running in '{APP_ENV}' environment.")
 
     storage = get_storage_strategy(APP_ENV, output_dir)
+    logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
     try:
         logger.info(f"Loading URLs from '{STEP2_FILENAME}'...")
-        # LocalStorageを使っている場合には、csvからioに読み込み、もう一度csvに治すという無駄が発生しているが、
-        # GCS Storageを使った時との統一的な扱い、抽象化するための無駄。
+        # LocalStorageを使っている場合には、csvからioに読み込み、再度csvに戻すという無駄が発生しているが、
+        # これは、GCS Storageを使った時との統一的な扱い、抽象化するための無駄。
         string_io_input = storage.read(STEP2_FILENAME)
         reader = csv.reader(string_io_input)
         rows = list(reader)
         logger.info(f"Successfully loaded {len(rows)} rows.")
 
-        processed_rows = remove_duplicate_rows_by_url(rows)
+        processed_rows = _remove_duplicate_rows_by_url(rows)
         logger.info(f"Successfully processed {len(processed_rows)} unique rows.")
 
-        # --- ここからが修正部分 ---
         logger.info(f"Converting {len(processed_rows)} unique rows to in-memory CSV...")
         string_io_output = convert_rows_to_in_memory_csv(processed_rows)
         logger.debug("In-memory CSV buffer created successfully.")
@@ -57,17 +61,16 @@ def execute(output_dir):
         storage.save(string_io_output, STEP3_FILENAME)
         logger.info(f"Successfully saved {len(processed_rows)} rows to '{STEP3_FILENAME}'.")
 
-    except StorageFileNotFoundError as e: # ← ここを変更！
-        logger.error(f"ファイルが見つかりません: {e}")
-        return
-    except StoragePermissionError as e: # ← ここを変更！
-        logger.error(f"ファイルへのアクセス権限がありません: {e}")
-        return
-    except csv.Error as e:
-        logger.error(f"CSVファイルの処理中にエラーが発生しました: {e}")
-        return
     except Exception as e:
-        logger.error(f"予期せぬエラーが発生しました: {e}", exc_info=True) # exc_info=True を付けると詳細なトレースバックがログに出力される
+        if isinstance(e, StorageFileNotFoundError):
+            logger.error(f"File not found: {e}")
+        elif isinstance(e, StoragePermissionError):
+            logger.error(f"File permission error: {e}")
+        elif isinstance(e, csv.Error):
+            logger.error(f"Error processing CSV file: {e}")
+        else:
+            logger.error(f"An unexpected error occurred: {e}", exc_info=True)
+        return
 
     logger.info("--- Step 3: Finished successfully ---")
 

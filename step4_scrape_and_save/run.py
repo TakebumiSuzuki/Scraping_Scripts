@@ -2,7 +2,7 @@ import io
 import csv
 import time
 import random
-from playwright.sync_api import sync_playwright, Error, Playwright, Browser
+from playwright.sync_api import sync_playwright, Error, Playwright, Browser, expect
 
 import config
 from storage_strategies import get_storage_strategy, StorageFileNotFoundError
@@ -13,12 +13,10 @@ logger = logging.getLogger(__name__)
 
 # --- Configuration Constants ---
 APP_ENV = config.APP_ENV
-GCS_BUCKET_NAME = config.GCS_BUCKET_NAME
 TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
-# (Scraperクラスは変更なし)
 class Scraper:
     """
     Playwrightのライフサイクルを管理し、単一ページのHTMLコンテンツ取得に特化したクラス。
@@ -49,19 +47,47 @@ class Scraper:
         logger.info(f"Scraping page: {url}")
         try:
             page.goto(url, timeout=self.timeout_ms, wait_until="networkidle")
-            logger.info("Expanding page content by clicking zippy containers...")
-            clickable_elements = page.locator("div.zippy-container > h2, div.zippy-container > a, div.zippy-container > h3").all()
-            for i, element in enumerate(clickable_elements):
-                try:
-                    element.click(timeout=5000)
-                    logger.debug(f"Clicked element {i+1}/{len(clickable_elements)}.")
-                    time.sleep(random.uniform(0.3, 0.7))
-                except Error as e:
-                    logger.warning(f"Could not click an expandable element on {url}: {e}")
 
+            logger.info("Expanding page content by clicking zippy containers...")
+
+            # 1. locatorオブジェクトを先に定義する
+            clickable_elements_locator = page.locator("div.zippy-container > h2, div.zippy-container > a, div.zippy-container > h3")
+
+            # 最初の要素が表示されるまで少し待つ（任意だが堅牢性が増す）
+            # これにより、コンテナ自体が存在しないページで無駄なループが走るのを防ぐ
+            try:
+                clickable_elements_locator.first.wait_for(timeout=3000)
+            except Error:
+                logger.warning(f"No expandable elements found on {url}. Proceeding without clicking.")
+                # このページにクリック対象がない場合は、そのまま後続処理へ
+                pass
+
+            count = clickable_elements_locator.count()
+            logger.info(f"Found {count} expandable elements.")
+
+            # 2. count()で取得した要素数でループし、nth(i)で各要素にアクセス
+            for i in range(count):
+                element = clickable_elements_locator.nth(i)
+                try:
+                    # 1. まず要素が「見える」状態になるまで待つ
+                    expect(element).to_be_visible(timeout=3000)
+
+                    # 2. 次に要素が「有効化」されている状態になるまで待つ
+                    expect(element).to_be_enabled(timeout=3000)
+
+                    element.click()
+                    logger.debug(f"Clicked element {i+1}/{count}.")
+                    time.sleep(random.uniform(0.3, 0.7))
+
+                except Error as e:
+                    logger.warning(f"Could not click an expandable element #{i+1} on {url}: {e}")
             article_container = page.locator(".article-container")
-            if article_container.count() == 0:
-                logger.error(f"Target element '.article-container' not found on {url}.")
+            try:
+                # .article-containerが画面に表示されるまで最大3秒待つ
+                expect(article_container).to_be_visible(timeout=3000)
+            except Error:
+                # タイムアウトした場合
+                logger.error(f"Target element '.article-container' not found or not visible on {url}.")
                 return None
             html_content = article_container.inner_html()
             logger.info(f"Successfully extracted HTML content from {url}.")
@@ -141,10 +167,10 @@ def execute(output_dir) -> None:
 
                     except Exception as e:
                         logger.error(f"Failed on attempt {attempt} for URL {url}: {e}")
-                        failures_in_this_attempt.append((category, url)) # 失敗リストに追加
+                        failures_in_this_attempt.append((category, url))
 
                     # 待機時間。試行回数が増えるごとに少し長く待つようにする
-                    sleep_time = random.uniform(2, 4) * attempt
+                    sleep_time = random.uniform(1.5, 3) * attempt
                     logger.info(f"Waiting for {sleep_time:.2f} seconds...")
                     time.sleep(sleep_time)
 
