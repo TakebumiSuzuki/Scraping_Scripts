@@ -33,12 +33,12 @@ def _remove_duplicate_rows_by_url(rows):
     return list(reversed(unique_rows))
 
 
-def execute(output_dir):
+def execute(interaction_dir):
 
     logger.info("--- Step 3: Removing Duplicate URLs and Saving the unique URLs List ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    storage = get_storage_strategy(APP_ENV, output_dir)
+    storage = get_storage_strategy(APP_ENV, interaction_dir)
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
     try:
@@ -77,4 +77,4 @@ def execute(output_dir):
 
 if __name__ == "__main__":
     setup_logging()
-    execute(output_dir='outputs/test')
+    execute(interaction_dir='outputs/test')

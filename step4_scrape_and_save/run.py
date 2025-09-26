@@ -103,13 +103,13 @@ class Scraper:
             logger.debug(f"Page and context for {url} closed.")
 
 
-def execute(output_dir) -> None:
+def execute(interaction_dir) -> None:
     """Main execution function for step 4."""
     logger.info("--- Step 4: Starting Scrape and Save HTML ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    input_storage = get_storage_strategy(APP_ENV, output_dir)
-    output_storage = get_storage_strategy(APP_ENV, output_dir, step_context='step4')
+    input_storage = get_storage_strategy(APP_ENV, interaction_dir)
+    output_storage = get_storage_strategy(APP_ENV, interaction_dir, step_context='step4')
 
     logger.info(f"Input Storage: '{input_storage.__class__.__name__}'")
     logger.info(f"Output Storage: '{output_storage.__class__.__name__}'")
@@ -199,4 +199,4 @@ def execute(output_dir) -> None:
 
 if __name__ == "__main__":
     setup_logging()
-    execute(output_dir='outputs/test')
+    execute(interaction_dir='outputs/test')

@@ -455,23 +455,23 @@ class SQLiteStorageStrategy(StorageStrategy):
 
 
 # --- Factory Function ---
-def get_storage_strategy(env: str, output_dir: str, step_context: str = 'default') -> StorageStrategy:
+def get_storage_strategy(env: str, interaction_dir: str, step_context: str = 'default') -> StorageStrategy:
     """
     Factory function to select the appropriate storage strategy.
     """
 
     if env == 'production':
         if step_context == 'step4': # step4ではページ保存用の戦略を返す
-            return GCSPageStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
+            return GCSPageStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=interaction_dir)
         else: # それ以外のステップでは単純ファイル用の戦略を返す
-            return GCSFileStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=output_dir)
+            return GCSFileStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=interaction_dir)
 
 
     # --- 開発環境の場合の分岐 ---
     # ベースとなるディレクトリパスを最初に組み立てる
     # 例: 'outputs/20250924_103055_123456'
     project_root_dir = pathlib.Path(__file__).parent
-    full_output_dir = project_root_dir / output_dir
+    full_output_dir = project_root_dir / interaction_dir
 
     if step_context == 'step4':
         # SQLiteの場合、ファイル名を指定

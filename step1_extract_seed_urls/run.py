@@ -76,7 +76,7 @@ def _fetch_urls(
 # execute関数 は ENTRY_URL や、BASE_URL などのコンテキスト、つまりモジュールのグローバル定数を知っているという丁で関数を書く。
 # しかし、それと同時に、これらを外部から一時的に変更できるような設計にもしたいので、デフォルト値としてこれら定数を注入するようにする。
 def execute(
-    output_dir,
+    interaction_dir,
     entry_url: str = ENTRY_URL,
     base_url: str = BASE_URL,
     container_selector: str = CONTAINER_SELECTOR,
@@ -91,7 +91,7 @@ def execute(
     logger.info("--- Step 1: Starting Seed URLs Extraction ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    storage_saver = get_storage_strategy(APP_ENV, output_dir)
+    storage_saver = get_storage_strategy(APP_ENV, interaction_dir)
     logger.info(f"Using storage strategy: '{storage_saver.__class__.__name__}'")
 
     try:
@@ -125,9 +125,9 @@ def execute(
         logger.info("In-memory CSV buffer created successfully.")
 
         # Step 4: Use the selected strategy to save the file
-        logger.info(f"Attempting to save URLs to '{STEP1_OUTPUT_FILENAME}' in directory '{output_dir}'...")
+        logger.info(f"Attempting to save URLs to '{STEP1_OUTPUT_FILENAME}' in directory '{interaction_dir}'...")
         storage_saver.save(string_io, STEP1_OUTPUT_FILENAME)
-        logger.info(f"Successfully saved URLs to '{STEP1_OUTPUT_FILENAME}' in directory '{output_dir}'.")
+        logger.info(f"Successfully saved URLs to '{STEP1_OUTPUT_FILENAME}' in directory '{interaction_dir}'.")
 
     except Exception as e: # まず全てのエラーをここで捕捉する
         if isinstance(e, Error): # Playwright固有のエラーの場合
@@ -144,4 +144,4 @@ def execute(
 
 if __name__ == "__main__":
     setup_logging()
-    execute(output_dir='outputs/test')
+    execute(interaction_dir='outputs/test')

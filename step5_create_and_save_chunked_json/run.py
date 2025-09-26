@@ -19,6 +19,7 @@ APP_ENV = config.APP_ENV
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 CHUNK_MIN_LENGTH = config.CHUNK_MIN_LENGTH
 CHUNK_MAX_LENGTH = config.CHUNK_MAX_LENGTH
+DATABASE_URL = config.DATABASE_URL
 
 
 def clean_up_html(html_content: str) -> str:
@@ -132,17 +133,17 @@ def add_metadata_and_finalize(chunks: list[str], url: str, category: str, scrape
 
 
 
-def execute(output_dir):
+def execute(interaction_dir):
     """Main execution function for step 5."""
     logger.info("--- Step 5: Starting HTML Chunking and Saving ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
     try:
-        input_storage = get_storage_strategy(APP_ENV, output_dir, step_context='step4')
+        input_storage = get_storage_strategy(APP_ENV, interaction_dir, step_context='step4')
         logger.info(f"Using input storage: '{input_storage.__class__.__name__}'")
 
         # 出力ストレージ戦略を取得 (step5のコンテキスト = デフォルト)
-        output_storage = get_storage_strategy(APP_ENV, output_dir)
+        output_storage = get_storage_strategy(APP_ENV, interaction_dir)
         logger.info(f"Using output storage: '{output_storage.__class__.__name__}'")
 
         # 2. html2textコンバータを初期化
@@ -203,4 +204,4 @@ def execute(output_dir):
 
 if __name__ == "__main__":
     setup_logging()
-    execute(output_dir='outputs/test')
+    execute(interaction_dir='outputs/test')

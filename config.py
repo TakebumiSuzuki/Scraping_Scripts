@@ -21,6 +21,8 @@ STEP2_OUTPUT_FILENAME = 'raw_urls_list.csv'
 STEP3_OUTPUT_FILENAME = 'unique_urls_list.csv'
 
 STEP5_OUTPUT_FILENAME = 'chunks.json'
+DATABASE_URL = "postgresql+psycopg2://postgres:your_password@localhost:5432/your_db"
+
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",

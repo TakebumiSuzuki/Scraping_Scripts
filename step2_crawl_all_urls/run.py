@@ -170,12 +170,12 @@ class Crawler:
             page.close()
 
 
-def execute(output_dir) -> None:
+def execute(interaction_dir) -> None:
     """Main execution function for step 2."""
     logger.info("--- Step 2: Starting Recursive URL Crawling ---")
     logger.info(f"Running in '{APP_ENV}' environment.")
 
-    storage = get_storage_strategy(APP_ENV, output_dir)
+    storage = get_storage_strategy(APP_ENV, interaction_dir)
     logger.info(f"Using storage strategy: '{storage.__class__.__name__}'")
 
     try:
@@ -230,4 +230,4 @@ def execute(output_dir) -> None:
 
 if __name__ == "__main__":
     setup_logging()
-    execute(output_dir='outputs/test')
+    execute(interaction_dir='outputs/test')
