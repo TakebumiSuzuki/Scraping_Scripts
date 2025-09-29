@@ -1,32 +1,25 @@
-import io
 import json
-import logging
 from datetime import datetime
+import uuid
 
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import declarative_base
+from database import Base
 from models.Chunk import Chunk
-
-Base = declarative_base()
 
 import config
 from storage_strategies import get_storage_strategy, StorageError
 
-
-# --- Loggerの設定 ---
-# config_logging.pyが存在することを前提としています
+import logging
 from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
-# --- 設定値の読み込み (config.pyから) ---
 APP_ENV = config.APP_ENV
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 DATABASE_URL = config.DATABASE_URL
 
 
-# pip install sqlalchemy psycopg2-binary を行うこと
 def execute(interaction_dir):
     """Main execution function for step 6."""
     logger.info("--- Step 6: Starting Chunk Saving to Database ---")
@@ -41,6 +34,7 @@ def execute(interaction_dir):
         # 2. chunks.jsonを読み込み、Pythonオブジェクトに変換
         logger.info(f"Reading chunks from '{STEP5_OUTPUT_FILENAME}'...")
         json_io = input_storage.read(STEP5_OUTPUT_FILENAME)
+        # ここでJSONファイルを辞書のリストに変換するが、日時を表す文字列はdatetimeオブジェクトに変換されず、文字列のまま。
         all_chunks_list = json.load(json_io)
 
         if not all_chunks_list:
@@ -52,18 +46,23 @@ def execute(interaction_dir):
 
         # 3. データベースへの接続設定
         logger.info("Connecting to the database...")
+
         engine = create_engine(DATABASE_URL)
 
         # テーブルが存在しない場合は作成する
         Base.metadata.create_all(engine)
 
+        # Webアプリケーションの各リクエストや、各ワーカースレッドは、それぞれが自分専用の Session を
+        # sessionmakerから生成して使い、処理が終わったらクローズ（session.close()）する
         Session = sessionmaker(bind=engine)
 
         # 4. データベースへの保存処理
-        # withブロックを使うことで、セッションのクローズが自動的に行われる
         with Session() as session:
             try:
-                # 冪等性（再実行可能性）を確保するため、これから挿入するデータのIDを先に取得
+                # 冪等性（再実行可能性）を確保するため、これから挿入するデータのIDを先に取得して削除。
+                # 冪等性[べきとうせい]（Idempotence）とは、「ある操作を何回実行しても、結果が常に同じになる」という性質のこと
+                # もし、何らかの理由（例えば、一度成功したのにネットワークエラーで成功通知が受け取れず、再実行してしまったなど）
+                # でこのプログラムが複数回実行された場合でも、データが重複しないようにする
                 ids_to_insert = [chunk['id'] for chunk in all_chunks_list]
 
                 # 該当するIDを持つ既存のレコードを先に削除する
@@ -73,6 +72,8 @@ def execute(interaction_dir):
 
                 # scraped_atを文字列からdatetimeオブジェクトに変換
                 for chunk in all_chunks_list:
+                    # chunk['id'] = uuid.UUID(chunk['id'])
+
                     # fromisoformatはタイムゾーン情報を含むISO 8601形式の文字列を正しくパースできる
                     chunk['scraped_at'] = datetime.fromisoformat(chunk['scraped_at'])
 

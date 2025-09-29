@@ -83,3 +83,4 @@ Desktop.ini
 
 
 *.sqlite
+.env

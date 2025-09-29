@@ -1028,3 +1028,8 @@ task: <Task pending name='Task-1225' coro=<BrowserContext.close() running at /Us
 task: <Task pending name='Task-1224' coro=<Page.goto() done, defined at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:549> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111, ProtocolCallback.__init__.<locals>.cb() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:228]>
 2025-09-26 11:05:51 - asyncio - ERROR - Task was destroyed but it is pending!
 task: <Task pending name='Task-1226' coro=<Browser.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_browser.py:232> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-09-29 08:32:22 - __main__ - INFO - --- Step 6: Starting Chunk Saving to Database ---
+2025-09-29 08:32:22 - __main__ - INFO - Running in 'development' environment.
+2025-09-29 08:32:22 - __main__ - INFO - Using input storage: 'LocalStorageStrategy'
+2025-09-29 08:32:22 - __main__ - INFO - Reading chunks from 'chunks.json'...
+2025-09-29 08:32:22 - __main__ - INFO - Successfully loaded 5856 chunks from the file.

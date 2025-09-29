@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Get the application environment from an environment variable.
 # If not set, default to 'development'.
@@ -21,8 +24,8 @@ STEP2_OUTPUT_FILENAME = 'raw_urls_list.csv'
 STEP3_OUTPUT_FILENAME = 'unique_urls_list.csv'
 
 STEP5_OUTPUT_FILENAME = 'chunks.json'
-DATABASE_URL = "postgresql+psycopg2://postgres:your_password@localhost:5432/your_db"
-
+# DATABASE_URL = "postgresql+psycopg2://postgres:your_password@localhost:5432/your_db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -36,3 +39,25 @@ USER_AGENTS = [
 CHUNK_MIN_LENGTH = 300
 
 CHUNK_MAX_LENGTH = 5000
+
+
+GCP_PROJECT = os.environ.get("GCP_PROJECT")
+GCP_REGION = os.environ.get("GCP_REGION", "asia-northeast1") # デフォルト値を指定することも可能
+VECTOR_SEARCH_INDEX_ID = os.environ.get("VECTOR_SEARCH_INDEX_ID")
+EMBEDDING_MODEL_NAME = "text-embedding-004" # または "textembedding-gecko@003" など
+
+# --- Batch Size Settings ---
+# text-embedding-004モデルのget_embeddingsメソッドのバッチサイズ上限は250です
+EMBEDDING_BATCH_SIZE = 250
+# Vector Searchのupsert_datapointsメソッドの1リクエストあたりのデータポイント上限は1,000です
+VECTOR_SEARCH_UPSERT_BATCH_SIZE = 1000
+
+
+"""APP_ENV="development"
+TIMEOUT=30
+GCS_BUCKET_NAME=""
+GCP_PROJECT="your-local-dev-gcp-project-id"
+GCP_REGION="asia-northeast1"
+VECTOR_SEARCH_INDEX_ID="your-dev-index-id"
+DATABASE_URL="postgresql+psycopg2://postgres:your_password@localhost:5432/your_db"
+"""
