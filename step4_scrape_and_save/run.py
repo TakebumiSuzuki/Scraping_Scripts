@@ -2,6 +2,7 @@ import io
 import csv
 import time
 import random
+import urllib.parse
 from playwright.sync_api import sync_playwright, Error, Playwright, Browser, expect
 
 import config
@@ -163,7 +164,9 @@ def execute(interaction_dir) -> None:
 
                         html_io = io.StringIO(html_content)
                         metadata = {'category': category}
-                        output_storage.save(html_io, filename=url, metadata=metadata)
+                        # スラッシュはGCSで回想とみなされてしまうので、それを + という文字に変換する
+                        safe_filename = urllib.parse.quote_plus(url)
+                        output_storage.save(html_io, filename=safe_filename, metadata=metadata)
 
                     except Exception as e:
                         logger.error(f"Failed on attempt {attempt} for URL {url}: {e}")

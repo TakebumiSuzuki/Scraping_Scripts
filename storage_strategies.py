@@ -462,7 +462,7 @@ def get_storage_strategy(env: str, interaction_dir: str, step_context: str = 'de
 
     if env == 'production':
         if step_context == 'step4': # step4ではページ保存用の戦略を返す
-            return GCSPageStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=interaction_dir)
+            return GCSPageStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=f'{interaction_dir}/pages')
         else: # それ以外のステップでは単純ファイル用の戦略を返す
             return GCSFileStorageStrategy(bucket_name=GCS_BUCKET_NAME, gcs_path_prefix=interaction_dir)
 

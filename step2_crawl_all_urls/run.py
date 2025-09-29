@@ -87,7 +87,8 @@ class Crawler:
             f"Max recursion depth ({self.MAX_RECURSION_DEPTH}) reached. Stopping crawl for this branch at URL: {url}")
             return
 
-        page = self.context.new_page(user_agent=random.choice(self.user_agents))
+        page = self.context.new_page()
+        page.set_extra_http_headers({'User-Agent': random.choice(self.user_agents)})
         logger.info(f"Scraping [Depth: {depth}]: {url}")
 
         try:

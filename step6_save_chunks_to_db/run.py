@@ -50,7 +50,7 @@ def execute(interaction_dir):
         engine = create_engine(DATABASE_URL)
 
         # テーブルが存在しない場合は作成する
-        Base.metadata.create_all(engine)
+        # Base.metadata.create_all(engine)
 
         # Webアプリケーションの各リクエストや、各ワーカースレッドは、それぞれが自分専用の Session を
         # sessionmakerから生成して使い、処理が終わったらクローズ（session.close()）する
@@ -59,6 +59,8 @@ def execute(interaction_dir):
         # 4. データベースへの保存処理
         with Session() as session:
             try:
+                """
+                以下は、upsertのような作業を行う場合。
                 # 冪等性（再実行可能性）を確保するため、これから挿入するデータのIDを先に取得して削除。
                 # 冪等性[べきとうせい]（Idempotence）とは、「ある操作を何回実行しても、結果が常に同じになる」という性質のこと
                 # もし、何らかの理由（例えば、一度成功したのにネットワークエラーで成功通知が受け取れず、再実行してしまったなど）
@@ -69,6 +71,11 @@ def execute(interaction_dir):
                 logger.info(f"Deleting {len(ids_to_insert)} existing chunks to prevent duplicates...")
                 # .where()句に合致する行がない場合、このdelete文は何も実行しない
                 session.execute(delete(Chunk).where(Chunk.id.in_(ids_to_insert)))
+                """
+                
+                # 以下は、upsertではなく、全件削除して、全て情報を入れ替える場合
+                logger.info("Deleting all existing chunks to make the table clean...")
+                session.execute(delete(Chunk))
 
                 # scraped_atを文字列からdatetimeオブジェクトに変換
                 for chunk in all_chunks_list:
@@ -79,6 +86,7 @@ def execute(interaction_dir):
 
                 # bulk_insert_mappingsを使って高速にデータを挿入
                 logger.info(f"Inserting {len(all_chunks_list)} new chunks into the database...")
+                # all_chunks_list 辞書のキーは、Chunkモデルで定義された属性名と一致している必要があります。
                 session.bulk_insert_mappings(Chunk, all_chunks_list)
 
                 # トランザクションをコミット

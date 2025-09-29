@@ -1033,3 +1033,265 @@ task: <Task pending name='Task-1226' coro=<Browser.close() running at /Users/tak
 2025-09-29 08:32:22 - __main__ - INFO - Using input storage: 'LocalStorageStrategy'
 2025-09-29 08:32:22 - __main__ - INFO - Reading chunks from 'chunks.json'...
 2025-09-29 08:32:22 - __main__ - INFO - Successfully loaded 5856 chunks from the file.
+2025-09-29 12:44:18 - __main__ - INFO - --- Step 2: Starting Recursive URL Crawling ---
+2025-09-29 12:44:18 - __main__ - INFO - Running in 'development' environment.
+2025-09-29 12:44:18 - __main__ - INFO - Using storage strategy: 'LocalStorageStrategy'
+2025-09-29 12:44:18 - __main__ - INFO - Loading seed URLs from 'seed_urls_list.csv'...
+2025-09-29 12:44:18 - __main__ - INFO - Loaded 57 seed URLs.
+2025-09-29 12:44:18 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-09-29 12:44:19 - __main__ - INFO - Crawler initialized: Playwright started, Browser launched.
+2025-09-29 12:44:19 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/9257404?hl=en&ref_topic=9257498
+2025-09-29 12:44:23 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-09-29 12:44:23 - __main__ - INFO - Scraping [Depth: 1]: https://support.google.com/youtube/topic/9257580?hl=en&ref_topic=9257404
+2025-09-29 12:44:28 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3037019?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/1230977?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6397026?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6062620?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/7519898?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/32050?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14005097?hl=en&ref_topic=9257580
+2025-09-29 12:44:28 - __main__ - INFO - Scraping [Depth: 1]: https://support.google.com/youtube/topic/9257499?hl=en&ref_topic=9257404
+2025-09-29 12:44:33 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/92571?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/77272?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6322658?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/9177241?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/78358?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/12318250?hl=en&ref_topic=9257499
+2025-09-29 12:44:33 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/12819304?hl=en&ref_topic=9257404
+2025-09-29 12:44:33 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/3024171?hl=en&ref_topic=9257498
+2025-09-29 12:44:37 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-09-29 12:44:37 - __main__ - WARNING - URL is out of scope (not answer/topic): https://support.google.com/youtube/troubleshooter/3219097?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3309286?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/165556?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/2972692?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6159254?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/1074205?hl=en&ref_topic=7071334
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/55759?hl=en&ref_topic=7071231
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/76187?hl=en&ref_topic=7071231
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/9701986?hl=en&ref_topic=7071231
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14701368?hl=en&ref_topic=7071231
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14849770?hl=en&ref_topic=7071231
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3056283?hl=en&ref_topic=7072138
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3046478?hl=en&ref_topic=7071641
+2025-09-29 12:44:37 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6388033?hl=en&ref_topic=7071641
+2025-09-29 12:44:37 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/2888603?hl=en&ref_topic=9257498
+2025-09-29 12:44:42 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-93' coro=<Page.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:830> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-09-29 12:44:42 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-92' coro=<Page.goto() done, defined at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:549> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111, ProtocolCallback.__init__.<locals>.cb() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:228]>
+2025-09-29 12:44:42 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-94' coro=<Browser.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_browser.py:232> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-09-29 12:57:06 - __main__ - INFO - --- Step 5: Starting HTML Chunking and Saving ---
+2025-09-29 12:57:06 - __main__ - INFO - Running in 'development' environment.
+2025-09-29 12:57:06 - __main__ - INFO - Using input storage: 'SQLiteStorageStrategy'
+2025-09-29 12:57:06 - __main__ - INFO - Using output storage: 'LocalStorageStrategy'
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 1: https://support.google.com/youtube/answer/9072033?hl=en&ref_topic=13401449
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 2: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=13401449
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 3: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=13343244
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 4: https://support.google.com/youtube/answer/6249136?hl=en&ref_topic=13343244
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 5: https://support.google.com/youtube/answer/13646088?hl=en&ref_topic=13343244
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 6: https://support.google.com/youtube/answer/7239739?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 7: https://support.google.com/youtube/answer/6342839?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 15 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 8: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 9: https://support.google.com/youtube/answer/111997?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 10: https://support.google.com/youtube/answer/7636475?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 11: https://support.google.com/youtube/answer/9210330?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 8 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 12: https://support.google.com/youtube/answer/9372650?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 13: https://support.google.com/youtube/answer/9744563?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 14: https://support.google.com/youtube/answer/9872296?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 15: https://support.google.com/youtube/answer/10806146?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 16: https://support.google.com/youtube/answer/11039077?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 17: https://support.google.com/youtube/answer/11997749?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 9 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 18: https://support.google.com/youtube/answer/15334500?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 6 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 19: https://support.google.com/youtube/answer/16089387?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 20: https://support.google.com/youtube/answer/16090438?hl=en&ref_topic=9257501
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 21: https://support.google.com/youtube/answer/2398242?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 22: https://support.google.com/youtube/answer/9396735?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 23: https://support.google.com/youtube/answer/7367023?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 24: https://support.google.com/youtube/answer/1047939?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 25: https://support.google.com/youtube/answer/3802431?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 26: https://support.google.com/youtube/answer/9209643?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 27: https://support.google.com/youtube/answer/16292076?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 28: https://support.google.com/youtube/answer/9730487?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 29: https://support.google.com/youtube/answer/14110396?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 10 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 30: https://support.google.com/youtube/answer/14728149?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 31: https://support.google.com/youtube/answer/14925346?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 10 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 32: https://support.google.com/youtube/answer/15994567?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 33: https://support.google.com/youtube/answer/16370674?hl=en&ref_topic=9257409
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 34: https://support.google.com/youtube/answer/6173147?hl=en&ref_topic=9257410
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 35: https://support.google.com/youtube/answer/6059409?hl=en&ref_topic=9257410
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 36: https://support.google.com/youtube/answer/9396645?hl=en&ref_topic=9257410
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 6 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 37: https://support.google.com/youtube/answer/9632097?hl=en&ref_topic=9257410
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 38: https://support.google.com/youtube/answer/12319243?hl=en&ref_topic=9257410
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 39: https://support.google.com/youtube/answer/9134402?hl=en&ref_topic=9257582
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 40: https://support.google.com/youtube/answer/9024948?hl=en&ref_topic=9257582
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 25 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 41: https://support.google.com/youtube/answer/14328604?hl=en&ref_topic=9257582
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 42: https://support.google.com/youtube/answer/9004474?hl=en&ref_topic=9257092
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 43: https://support.google.com/youtube/answer/9057101?hl=en&ref_topic=9257092
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 9 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 44: https://support.google.com/youtube/answer/7630512?hl=en&ref_topic=9257092
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 45: https://support.google.com/youtube/answer/10047535?hl=en&ref_topic=9257092
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 14 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 46: https://support.google.com/youtube/answer/9879686?hl=en&ref_topic=9257408
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 47: https://support.google.com/youtube/answer/13822251?hl=en&ref_topic=9257408
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 48: https://support.google.com/youtube/answer/9795167?hl=en&ref_topic=10726886
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 49: https://support.google.com/youtube/answer/10726080?hl=en&ref_topic=10726886
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 6 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 50: https://support.google.com/youtube/answer/12726650?hl=en&ref_topic=10726886
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 51: https://support.google.com/youtube/answer/12796915?hl=en&ref_topic=10726886
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 52: https://support.google.com/youtube/answer/14867414?hl=en&ref_topic=10726886
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 53: https://support.google.com/youtube/answer/74663?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 54: https://support.google.com/youtube/answer/72689?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 55: https://support.google.com/youtube/answer/7509567?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 56: https://support.google.com/youtube/answer/91449?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 57: https://support.google.com/youtube/answer/6052392?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 58: https://support.google.com/youtube/answer/6124459?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 59: https://support.google.com/youtube/answer/7174115?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 60: https://support.google.com/youtube/answer/14001626?hl=en&ref_topic=9257411
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 61: https://support.google.com/youtube/answer/7403255?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 62: https://support.google.com/youtube/answer/7385323?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 63: https://support.google.com/youtube/answer/7552722?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 64: https://support.google.com/youtube/answer/9162927?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 65: https://support.google.com/youtube/answer/7640367?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 66: https://support.google.com/youtube/answer/12820428?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 67: https://support.google.com/youtube/answer/14106294?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 68: https://support.google.com/youtube/answer/15397997?hl=en&ref_topic=9257583
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 69: https://support.google.com/youtube/answer/189278?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 9 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 70: https://support.google.com/youtube/answer/7364677?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 71: https://support.google.com/youtube/answer/7631406?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 72: https://support.google.com/youtube/answer/9012523?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 73: https://support.google.com/youtube/answer/9047376?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 74: https://support.google.com/youtube/answer/9052667?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 75: https://support.google.com/youtube/answer/9156467?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 76: https://support.google.com/youtube/answer/87604?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 5 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 77: https://support.google.com/youtube/answer/9270670?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 78: https://support.google.com/youtube/answer/9884905?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 79: https://support.google.com/youtube/answer/10788593?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 80: https://support.google.com/youtube/answer/6327615?hl=en&ref_topic=9257412
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 10 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 81: https://support.google.com/youtube/answer/6141269?hl=en&ref_topic=9257093
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 82: https://support.google.com/youtube/answer/7014021?hl=en&ref_topic=9257093
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 83: https://support.google.com/youtube/answer/7381355?hl=en&ref_topic=9257093
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 84: https://support.google.com/youtube/answer/7381437?hl=en&ref_topic=9257093
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 85: https://support.google.com/youtube/answer/3029103?hl=en&ref_topic=9257094
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 86: https://support.google.com/youtube/answer/100078?hl=en&ref_topic=9257094
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 4 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 87: https://support.google.com/youtube/answer/15921047?hl=en&ref_topic=9257094
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 88: https://support.google.com/youtube/answer/15930243?hl=en&ref_topic=9257094
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 89: https://support.google.com/youtube/answer/146399?hl=en&ref_topic=9257095
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 90: https://support.google.com/youtube/answer/2707212?hl=en&ref_topic=9257095
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 91: https://support.google.com/youtube/answer/12825599?hl=en&ref_topic=9257502
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 7 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 92: https://support.google.com/youtube/answer/12827017?hl=en&ref_topic=9257502
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 93: https://support.google.com/youtube/answer/13339776?hl=en&ref_topic=9257502
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 94: https://support.google.com/youtube/answer/3227660?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 1 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 95: https://support.google.com/youtube/answer/7341336?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 96: https://support.google.com/youtube/answer/9040743?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 97: https://support.google.com/youtube/answer/7174035?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 98: https://support.google.com/youtube/answer/3008060?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 99: https://support.google.com/youtube/answer/7356379?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 3 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 100: https://support.google.com/youtube/answer/6087602?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 13 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 101: https://support.google.com/youtube/answer/13323542?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processing page 102: https://support.google.com/youtube/answer/13323543?hl=en&ref_topic=9257585
+2025-09-29 12:57:06 - __main__ - DEBUG - Generated 2 chunks for this page.
+2025-09-29 12:57:06 - __main__ - INFO - Processed 102 pages and generated a total of 404 chunks.
+2025-09-29 12:57:06 - __main__ - INFO - Preparing to save chunks to 'chunks.json'...
+2025-09-29 12:57:06 - __main__ - INFO - Successfully saved all chunks to 'chunks.json'.
+2025-09-29 12:57:06 - __main__ - INFO - --- Step 5: Finished successfully ---

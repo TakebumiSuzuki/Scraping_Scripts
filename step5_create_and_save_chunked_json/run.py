@@ -2,6 +2,7 @@ import io
 import json
 import re
 from uuid import uuid4
+import urllib.parse
 
 from bs4 import BeautifulSoup
 import html2text
@@ -158,8 +159,9 @@ def execute(interaction_dir):
         page_iterator = input_storage.get_storage_iterator()
 
         # scraped_atは、sqliteからUTCの文字列として取り出される。これはそのままJSONに保存できる日時形式。
-        for category, url, html_content, scraped_at in page_iterator:
+        for category, safe_url, html_content, scraped_at in page_iterator:
             page_count += 1
+            url = urllib.parse.unquote_plus(safe_url)
             logger.info(f"Processing page {page_count}: {url}")
 
             if not html_content:
