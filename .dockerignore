@@ -1,0 +1,36 @@
+# Git関連のファイル
+.git
+.gitignore
+
+# Docker関連のファイル（イメージに含める必要はない）
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Pythonの仮想環境ディレクトリ
+.venv
+venv
+env
+
+# Pythonのキャッシュファイル
+__pycache__/
+*.pyc
+
+# Node.jsの依存関係（Playwrightは内部でNode.jsも使うため）
+node_modules/
+
+# エディタやIDEの設定ファイル
+.vscode/
+.idea/
+
+# OS固有のファイル
+.DS_Store
+Thumbs.db
+
+# 環境変数ファイル（機密情報を含むためイメージに含めない）
+.env
+
+# テストレポートやログファイル
+test-results/
+playwright-report/
+*.log

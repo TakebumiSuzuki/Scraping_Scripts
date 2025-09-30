@@ -1,0 +1,33 @@
+# docker-compose が作成する各種リソース（コンテナ、ネットワーク、ボリュームなど）の名前の接頭辞 (prefix) を明示的に指定
+name: scraping-and-embedding-project
+
+services:
+  playwright:
+    # docker build コマンドを実行しなくても、Dockerfile から直接イメージをビルドしてくれるようになる
+    # これにより、docker-compose up --build　が使えるようにもなる。
+    build: .
+    # ビルドしたイメージに付ける名前（タグ）を指定
+    image: test-playwright-image
+
+    # .env ファイルを読み込んで、コンテナ内の環境変数として設定
+    env_file:
+      - .env
+
+    # ホストOSのディレクトリをコンテナ内にマウント（バインドマウント）
+    # これにより、ホスト側でコードを編集すると即座にコンテナ内に反映される
+    # 形式 -> 'ホストOSのパス:コンテナ内のパス'
+    volumes:
+      - ./:/app/
+
+    # コンテナをインタラクティブモードで起動し続けるための設定
+    # これがないと、実行するコマンドが終了するとコンテナも停止してしまう
+    tty: true
+    stdin_open: true
+
+    # コンテナ起動時に実行されるデフォルトのコマンドを指定
+    # DockerfileのCMDを上書きする
+    command: bash
+    # command: python main.py
+
+    # (任意) DockerfileでUSER pwuserを指定していても、ここで明示することもできる
+    # user: "pwuser"
