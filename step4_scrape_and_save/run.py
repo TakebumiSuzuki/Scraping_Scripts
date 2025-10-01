@@ -18,6 +18,10 @@ TIMEOUT_MS = config.TIMEOUT * 1000
 USER_AGENTS = config.USER_AGENTS
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
+class RedirectedURLSkipException(Exception):
+    """リダイレクトが検出され、URLの処理をスキップすることを示すための例外。"""
+    pass
+
 class Scraper:
     """
     Playwrightのライフサイクルを管理し、単一ページのHTMLコンテンツ取得に特化したクラス。
@@ -47,7 +51,9 @@ class Scraper:
         page = context.new_page()
         logger.info(f"Scraping page: {url}")
         try:
-            page.goto(url, timeout=self.timeout_ms, wait_until="networkidle")
+            # もし url からのレスポンスががリダイレクトを要求した場合には、リダイレクト先にアクセスした上で、
+            # ブラウザで domcontentloaded シグナルが発火されるのを動機的に待つ。
+            page.goto(url, timeout=self.timeout_ms, wait_until="domcontentloaded")
 
             logger.info("Expanding page content by clicking zippy containers...")
 
@@ -65,6 +71,17 @@ class Scraper:
 
             count = clickable_elements_locator.count()
             logger.info(f"Found {count} expandable elements.")
+
+
+            # ページ読み込み直後、待機せずにリダイレクトされたかを判定する。
+            # ヘルプトップページに特徴的な<h1 class="promoted-search__greeting">の存在をチェック。
+            redirect_indicator = page.locator("h1.promoted-search__greeting")
+
+            # .is_visible() はタイムアウトで待機せず、その瞬間の可視状態を即座に返す。
+            if redirect_indicator.is_visible():
+                logger.warning(f"URL was redirected to a main page. Skipping scrape for: {url}")
+                raise RedirectedURLSkipException() # 例外を発生させる
+
 
             # 2. count()で取得した要素数でループし、nth(i)で各要素にアクセス
             for i in range(count):
@@ -168,6 +185,11 @@ def execute(interaction_dir) -> None:
                         safe_filename = urllib.parse.quote_plus(url)
                         output_storage.save(html_io, filename=safe_filename, metadata=metadata)
 
+                    except RedirectedURLSkipException:
+                        # リダイレクトによるスキップは「失敗」ではないので、ログにも残さず、
+                        # リトライリストにも追加しない。ただ静かに次のURLへ進む。
+                        pass
+                    
                     except Exception as e:
                         logger.error(f"Failed on attempt {attempt} for URL {url}: {e}")
                         failures_in_this_attempt.append((category, url))
