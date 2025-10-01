@@ -82,6 +82,12 @@ class Scraper:
                 logger.warning(f"URL was redirected to a main page. Skipping scrape for: {url}")
                 raise RedirectedURLSkipException() # 例外を発生させる
 
+            # 2. 次に、私のスクリプト環境で発生した「コンテンツ削除済み」ページをチェックする
+            no_content_indicator = page.locator("div.no-content-message")
+            if no_content_indicator.is_visible():
+                logger.warning(f"Content is no longer available. Skipping: {url}")
+                raise RedirectedURLSkipException()
+
 
             # 2. count()で取得した要素数でループし、nth(i)で各要素にアクセス
             for i in range(count):
@@ -119,7 +125,6 @@ class Scraper:
         finally:
             context.close()
             logger.debug(f"Page and context for {url} closed.")
-
 
 def execute(interaction_dir) -> None:
     """Main execution function for step 4."""
@@ -189,7 +194,7 @@ def execute(interaction_dir) -> None:
                         # リダイレクトによるスキップは「失敗」ではないので、ログにも残さず、
                         # リトライリストにも追加しない。ただ静かに次のURLへ進む。
                         pass
-                    
+
                     except Exception as e:
                         logger.error(f"Failed on attempt {attempt} for URL {url}: {e}")
                         failures_in_this_attempt.append((category, url))
