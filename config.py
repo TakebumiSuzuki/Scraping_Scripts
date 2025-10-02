@@ -7,6 +7,8 @@ load_dotenv()
 # If not set, default to 'development'.
 APP_ENV = os.environ.get('APP_ENV', 'development')
 
+OUTPUT_BASE_DIR = 'outputs'
+
 # You can add other configurations here later.
 GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'your-gcs-bucket-name')
 SQLITE_DB_FILENAME = "scraped_data.sqlite"

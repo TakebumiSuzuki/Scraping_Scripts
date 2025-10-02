@@ -1,3 +1,5 @@
+import sys
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +16,7 @@ import logging
 from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
+OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 
 def execute():
     """
@@ -159,5 +162,12 @@ def execute():
 
 
 if __name__ == "__main__":
-    setup_logging()
+    # コマンドライン引数が存在すれば、それで上書きする
+    if len(sys.argv) > 1:
+        run_id_arg = sys.argv[1]
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, run_id_arg)
+    else:
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, 'test')
+
+    setup_logging(base_dir=interaction_dir)
     execute()

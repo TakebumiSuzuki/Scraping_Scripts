@@ -1,3 +1,5 @@
+import sys
+import os
 import csv
 import config
 
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 APP_ENV = config.APP_ENV
+OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
 STEP3_FILENAME = config.STEP3_OUTPUT_FILENAME
 
@@ -76,5 +79,12 @@ def execute(interaction_dir):
 
 
 if __name__ == "__main__":
-    setup_logging()
-    execute(interaction_dir='outputs/test')
+    # コマンドライン引数が存在すれば、それで上書きする
+    if len(sys.argv) > 1:
+        run_id_arg = sys.argv[1]
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, run_id_arg)
+    else:
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, 'test')
+
+    setup_logging(base_dir=interaction_dir)
+    execute(interaction_dir)

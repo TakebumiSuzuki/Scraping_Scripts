@@ -1,3 +1,5 @@
+import sys
+import os
 import json
 from datetime import datetime
 import uuid
@@ -16,6 +18,7 @@ from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
 APP_ENV = config.APP_ENV
+OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 DATABASE_URL = config.DATABASE_URL
 
@@ -72,7 +75,7 @@ def execute(interaction_dir):
                 # .where()句に合致する行がない場合、このdelete文は何も実行しない
                 session.execute(delete(Chunk).where(Chunk.id.in_(ids_to_insert)))
                 """
-                
+
                 # 以下は、upsertではなく、全件削除して、全て情報を入れ替える場合
                 logger.info("Deleting all existing chunks to make the table clean...")
                 session.execute(delete(Chunk))
@@ -117,5 +120,12 @@ def execute(interaction_dir):
 
 
 if __name__ == "__main__":
-    setup_logging()
-    execute(interaction_dir='outputs/test')
+    # コマンドライン引数が存在すれば、それで上書きする
+    if len(sys.argv) > 1:
+        run_id_arg = sys.argv[1]
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, run_id_arg)
+    else:
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, 'test')
+
+    setup_logging(base_dir=interaction_dir)
+    execute(interaction_dir)

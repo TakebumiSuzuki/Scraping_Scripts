@@ -1,3 +1,5 @@
+import os
+import sys
 import random
 from urllib.parse import urljoin
 from playwright.sync_api import sync_playwright, Playwright, Error
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 # --- Configuration Constants ---
 APP_ENV = config.APP_ENV
+OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 TIMEOUT_MS = config.TIMEOUT * 1000
 STEP1_OUTPUT_FILENAME = config.STEP1_OUTPUT_FILENAME
 USER_AGENTS = config.USER_AGENTS
@@ -19,8 +22,8 @@ USER_AGENTS = config.USER_AGENTS
 # --- Logic Constants ---
 ENTRY_URL = "https://support.google.com/youtube#topic="
 BASE_URL = "https://support.google.com"
-CONTAINER_SELECTOR = "article.article nav.accordion-homepage"
-LINK_SELECTOR = f"{CONTAINER_SELECTOR} a"
+WAIT_FOR_SELECTOR = "article.article nav.accordion-homepage section:last-child a"
+QUERY_SELECTOR = "article.article nav.accordion-homepage section a"
 
 
 def _fetch_urls(
@@ -29,8 +32,8 @@ def _fetch_urls(
     base_url: str,
     timeout: int,
     user_agent: str,
-    container_selector: str,
-    link_selector: str
+    wait_for_selector: str,
+    query_selector: str
 ) -> list[str]:
     """
     Navigates to a URL using Playwright and extracts a list of anchor hrefs.
@@ -47,14 +50,32 @@ def _fetch_urls(
         logger.info(f"Navigating to page: {entry_url}")
         page.goto(entry_url, timeout=timeout)
 
-        logger.info(f"Waiting for container element: '{container_selector}'")
-        # 指定されたCSSセレクタに一致する要素がWebページのDOM内に出現するまで、コードの実行をその場で一時停止する。
+        # logger.info(f"Waiting for the last container's target element: '{wait_for_selector}'")
+
+        # page.wait_for_selector() は、指定されたCSSセレクタに一致する要素がページのDOM内に少なくとも1つ
+        # 出現した時点で、待機を完了し、すぐに次のコードの実行に移ります。
         # 本来、非同期版のPlaywrightでは await page.wait_for_selector(...) と書く必要があるが、
         # このコードで使われている同期版（sync_playwright）では、awaitなしで実行できるようになっている。
-        page.wait_for_selector(container_selector, timeout=timeout)
+        # page.wait_for_selector(container_selector, timeout=timeout)
 
-        logger.info(f"Querying for link elements: '{link_selector}'")
-        link_elements = page.query_selector_all(link_selector)
+        # logger.info(f"Waiting for at least one link element to appear: '{link_selector}'")
+        # "article.article nav.accordion-homepage a" というセレクタに一致する
+        # 最初の <a> 要素が現れるまで待機する。
+        # page.wait_for_selector(link_selector, timeout=timeout)
+
+
+        logger.info(f"Waiting for the last target element to be attached to the DOM: '{wait_for_selector}'")
+
+        # page.wait_for_selector() は、指定されたCSSセレクタに一致する要素がページのDOM内に少なくとも1つ
+        # 表示された時点で、待機を完了し、すぐに次のコードの実行に移ります。
+        # 本来、非同期版のPlaywrightでは await page.wait_for_selector(...) と書く必要があるが、
+        # このコードで使われている同期版（sync_playwright）では、awaitなしで実行できるようになっている。
+        # ここでは、state='attached'により、最後のリンクが「表示」されるまでではなく、「DOMにアタッチ」されるまで待つ
+        page.wait_for_selector(wait_for_selector, timeout=timeout, state='attached')
+
+        # この時点で、ほぼ全てのリンクがDOMに存在することが期待できる
+        logger.info(f"Querying for link elements: '{query_selector}'")
+        link_elements = page.query_selector_all(query_selector)
         logger.debug(f"Found {len(link_elements)} link elements.")
 
         for link_element in link_elements:
@@ -65,9 +86,9 @@ def _fetch_urls(
 
     finally:
         logger.info("Closing browser context.")
-        # browser.close() を呼び出すと、そのブラウザインスタンスが所有するすべてのブラウザコンテキスト (BrowserContext) が自動的に閉じられます。
-        # ブラウザコンテキストが閉じられると、そのコンテキストが所有するすべてのページ (Page) も自動的に閉じられます。
-        # よってここで page.close() を呼び出す必要はありません。
+        # browser.close() を呼び出すと、Browser インスタンスに属するすべての BrowserContext と、それに付随するすべての
+        # Page が自動的に、かつ適切に閉じられ、関連するリソース（メモリやプロセスなど）がすべて解放されます。
+        # よってここで page.close() などを追加で呼び出す必要はありません。
         browser.close()
 
     return extracted_absolute_urls
@@ -79,9 +100,9 @@ def execute(
     interaction_dir,
     entry_url: str = ENTRY_URL,
     base_url: str = BASE_URL,
-    container_selector: str = CONTAINER_SELECTOR,
-    link_selector: str = LINK_SELECTOR
-):
+    wait_for_selector: str = WAIT_FOR_SELECTOR,
+    query_selector: str = QUERY_SELECTOR
+) -> None:
     """
     Extracts all link URLs from a target web page and saves them to a CSV file.
 
@@ -95,7 +116,6 @@ def execute(
     logger.info(f"Using storage strategy: '{storage_saver.__class__.__name__}'")
 
     try:
-        selected_user_agent = random.choice(USER_AGENTS)
         # Step 1: Fetch URLs using Playwright
         with sync_playwright() as p:
             urls = _fetch_urls(
@@ -103,9 +123,9 @@ def execute(
                 entry_url,
                 base_url,
                 timeout=TIMEOUT_MS,
-                user_agent=selected_user_agent,
-                container_selector=container_selector,
-                link_selector=link_selector
+                user_agent=random.choice(USER_AGENTS),
+                wait_for_selector=wait_for_selector,
+                query_selector=query_selector
             )
 
         # Step 2: Process the extracted URLs
@@ -143,5 +163,12 @@ def execute(
 
 
 if __name__ == "__main__":
-    setup_logging()
-    execute(interaction_dir='outputs/test')
+    # コマンドライン引数が存在すれば、それで上書きする
+    if len(sys.argv) > 1:
+        run_id_arg = sys.argv[1]
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, run_id_arg)
+    else:
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, 'test')
+
+    setup_logging(base_dir=interaction_dir)
+    execute(interaction_dir)

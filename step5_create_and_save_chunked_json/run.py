@@ -1,3 +1,5 @@
+import sys
+import os
 import io
 import json
 import re
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 # --- 設定値の読み込み (config.pyから) ---
 APP_ENV = config.APP_ENV
+OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 CHUNK_MIN_LENGTH = config.CHUNK_MIN_LENGTH
 CHUNK_MAX_LENGTH = config.CHUNK_MAX_LENGTH
@@ -205,5 +208,12 @@ def execute(interaction_dir):
 
 
 if __name__ == "__main__":
-    setup_logging()
-    execute(interaction_dir='outputs/test')
+    # コマンドライン引数が存在すれば、それで上書きする
+    if len(sys.argv) > 1:
+        run_id_arg = sys.argv[1]
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, run_id_arg)
+    else:
+        interaction_dir = os.path.join(OUTPUT_BASE_DIR, 'test')
+
+    setup_logging(base_dir=interaction_dir)
+    execute(interaction_dir)
