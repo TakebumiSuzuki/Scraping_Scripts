@@ -161,3 +161,65 @@ Call log:
 2025-10-02 11:37:43 - __main__ - INFO - Attempting to save URLs to 'seed_urls_list.csv' in directory 'outputs/test'...
 2025-10-02 11:37:43 - __main__ - INFO - Successfully saved URLs to 'seed_urls_list.csv' in directory 'outputs/test'.
 2025-10-02 11:37:43 - __main__ - INFO - --- Step 1: Finished successfully ---
+2025-10-02 12:21:37 - __main__ - INFO - --- Step 2: Starting Recursive URL Crawling ---
+2025-10-02 12:21:37 - __main__ - INFO - Running in 'development' environment.
+2025-10-02 12:21:37 - __main__ - INFO - Using storage strategy: 'LocalStorageStrategy'
+2025-10-02 12:21:37 - __main__ - INFO - Loading seed URLs from 'seed_urls_list.csv'...
+2025-10-02 12:21:37 - __main__ - INFO - Loaded 57 seed URLs.
+2025-10-02 12:21:37 - asyncio - DEBUG - Using selector: KqueueSelector
+2025-10-02 12:21:37 - __main__ - INFO - Crawler initialized: Playwright started, Browser launched.
+2025-10-02 12:21:37 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/9257404?hl=en&ref_topic=9257498
+2025-10-02 12:21:41 - __main__ - DEBUG - 'section.topic-container' is visible.
+2025-10-02 12:21:41 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-10-02 12:21:41 - __main__ - INFO - Scraping [Depth: 1]: https://support.google.com/youtube/topic/9257580?hl=en&ref_topic=9257404
+2025-10-02 12:21:45 - __main__ - DEBUG - 'section.topic-container' is visible.
+2025-10-02 12:21:45 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3037019?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/1230977?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6397026?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6062620?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/7519898?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/32050?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14005097?hl=en&ref_topic=9257580
+2025-10-02 12:21:45 - __main__ - DEBUG - Successfully scraped: https://support.google.com/youtube/topic/9257580?hl=en&ref_topic=9257404
+2025-10-02 12:21:45 - __main__ - DEBUG - Page closed for URL: https://support.google.com/youtube/topic/9257580?hl=en&ref_topic=9257404 after attempt 1
+2025-10-02 12:21:46 - __main__ - INFO - Scraping [Depth: 1]: https://support.google.com/youtube/topic/9257499?hl=en&ref_topic=9257404
+2025-10-02 12:21:49 - __main__ - DEBUG - 'section.topic-container' is visible.
+2025-10-02 12:21:49 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/92571?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/77272?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6322658?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/9177241?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/78358?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/12318250?hl=en&ref_topic=9257499
+2025-10-02 12:21:49 - __main__ - DEBUG - Successfully scraped: https://support.google.com/youtube/topic/9257499?hl=en&ref_topic=9257404
+2025-10-02 12:21:49 - __main__ - DEBUG - Page closed for URL: https://support.google.com/youtube/topic/9257499?hl=en&ref_topic=9257404 after attempt 1
+2025-10-02 12:21:49 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/12819304?hl=en&ref_topic=9257404
+2025-10-02 12:21:49 - __main__ - DEBUG - Successfully scraped: https://support.google.com/youtube/topic/9257404?hl=en&ref_topic=9257498
+2025-10-02 12:21:49 - __main__ - DEBUG - Page closed for URL: https://support.google.com/youtube/topic/9257404?hl=en&ref_topic=9257498 after attempt 1
+2025-10-02 12:21:49 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/3024171?hl=en&ref_topic=9257498
+2025-10-02 12:21:53 - __main__ - DEBUG - 'section.topic-container' is visible.
+2025-10-02 12:21:53 - __main__ - DEBUG - 'div.topic-children' container is visible and ready.
+2025-10-02 12:21:53 - __main__ - WARNING - URL is out of scope (not answer/topic): https://support.google.com/youtube/troubleshooter/3219097?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3309286?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/165556?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/2972692?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6159254?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/1074205?hl=en&ref_topic=7071334
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/55759?hl=en&ref_topic=7071231
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/76187?hl=en&ref_topic=7071231
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/9701986?hl=en&ref_topic=7071231
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14701368?hl=en&ref_topic=7071231
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/14849770?hl=en&ref_topic=7071231
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3056283?hl=en&ref_topic=7072138
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/3046478?hl=en&ref_topic=7071641
+2025-10-02 12:21:53 - __main__ - DEBUG - Found Answer URL: https://support.google.com/youtube/answer/6388033?hl=en&ref_topic=7071641
+2025-10-02 12:21:53 - __main__ - DEBUG - Successfully scraped: https://support.google.com/youtube/topic/3024171?hl=en&ref_topic=9257498
+2025-10-02 12:21:53 - __main__ - DEBUG - Page closed for URL: https://support.google.com/youtube/topic/3024171?hl=en&ref_topic=9257498 after attempt 1
+2025-10-02 12:21:53 - __main__ - INFO - Scraping [Depth: 0]: https://support.google.com/youtube/topic/2888603?hl=en&ref_topic=9257498
+2025-10-02 12:22:01 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-93' coro=<Page.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:830> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>
+2025-10-02 12:22:01 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-92' coro=<Page.goto() done, defined at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_page.py:549> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111, ProtocolCallback.__init__.<locals>.cb() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:228]>
+2025-10-02 12:22:01 - asyncio - ERROR - Task was destroyed but it is pending!
+task: <Task pending name='Task-94' coro=<Browser.close() running at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_browser.py:232> cb=[SyncBase._sync.<locals>.<lambda>() at /Users/takebumi/Documents/Python_Codes/Scraping_and_Embedding/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py:111]>

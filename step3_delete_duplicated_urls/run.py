@@ -10,7 +10,6 @@ import logging
 from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
-
 APP_ENV = config.APP_ENV
 OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 STEP2_FILENAME = config.STEP2_OUTPUT_FILENAME
@@ -73,6 +72,7 @@ def execute(interaction_dir):
             logger.error(f"Error processing CSV file: {e}")
         else:
             logger.error(f"An unexpected error occurred: {e}", exc_info=True)
+        logger.info("--- Step 3: Finished with errors ---")
         return
 
     logger.info("--- Step 3: Finished successfully ---")

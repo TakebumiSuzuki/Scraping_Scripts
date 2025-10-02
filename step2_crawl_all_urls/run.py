@@ -14,7 +14,6 @@ import logging
 from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
-
 APP_ENV = config.APP_ENV
 OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 TIMEOUT_MS = config.TIMEOUT * 1000
@@ -46,7 +45,7 @@ class Crawler:
 
     def __enter__(self):
         """Executed when entering the 'with' statement."""
-        # start()はバックグラウンドでPlaywrightのサーバープロセスが起動し、接続準備が整うまで処理を同期処理、つまりブロックします。
+        # start()はバックグラウンドでPlaywrightのサーバープロセスが同期的に起動し、接続準備が整うまで処理をブロックします。
         self.playwright = sync_playwright().start()
         self.browser = self.playwright.chromium.launch(headless=True)
         self.context = self.browser.new_context()
@@ -84,98 +83,6 @@ class Crawler:
         new_query = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
         return parsed_url._replace(query=new_query).geturl()
 
-    # def crawl_page(self, url: str, parent_title: str = "", depth: int = 0) -> None:
-    #     """
-    #     Scrapes a single URL. This method is self-contained,
-    #     handling the entire lifecycle of a Page object from creation to disposal.
-    #     """
-    #     if depth > self.MAX_RECURSION_DEPTH:
-    #         logger.debug(
-    #         f"Max recursion depth ({self.MAX_RECURSION_DEPTH}) reached. Stopping crawl for this branch at URL: {url}")
-    #         return
-
-    #     page = self.context.new_page()
-    #     page.set_extra_http_headers({'User-Agent': random.choice(self.user_agents)})
-    #     logger.info(f"Scraping [Depth: {depth}]: {url}")
-
-    #     try:
-    #         page.goto(url, timeout=self.timeout_ms, wait_until="networkidle")
-    #         time.sleep(random.uniform(1, 2))
-
-    #         # locatorオブジェクト自体は「指示書」や「リモコン」のようなものだが、.count()や.all()のような特定のメソッドを
-    #         # 呼び出してしまうと、その瞬間にPlaywrightはブラウザに問い合わせを行い、実際に要素の検索を実行する。
-    #         # sectionsは Locatorオブジェクト。上記の通り、遅延実行の性質を持っている。
-    #         sections = page.locator('section.topic-container')
-    #         if sections.count() == 0:
-    #             logger.warning(f"No 'section.topic-container' found on page: {url}. Assuming it's a leaf page.")
-    #             return
-
-    #         # _safe_get_textは、複数あったとしても、最初の h1 のみを取得する。
-    #         h1_text = self._safe_get_text(sections.locator('h1'))
-    #         if not h1_text:
-    #             logger.warning(f"No h1 title found on page: {url}")
-
-    #         topic_children = page.locator('div.topic-children')
-    #         try:
-    #             # 同期的に実行される。(非同期版の async_api を使用する場合には、await キーワードを使う必要がある。)
-    #             topic_children.wait_for(state='visible', timeout=15000)
-    #             logger.debug("'div.topic-children' container is visible and ready.")
-    #         except Error:
-    #             logger.warning(f"Content in 'div.topic-children' did not appear correctly on: {url}.")
-    #             return
-
-    #         # child_divsというのが、h2とそのトピックリストがまとまった島の集合
-    #         child_divs = topic_children.locator('> div').all()
-    #         if not child_divs:
-    #             child_divs = [topic_children]
-
-    #         # child_divは、h2とそのトピックリストがまとまった一つの島
-    #         for child_div in child_divs:
-    #             mid_title = self._safe_get_text(child_div.locator('h2'))
-
-    #             title_parts = []
-    #             if parent_title:
-    #                 title_parts.append(parent_title)
-    #             if h1_text:
-    #                 title_parts.append(h1_text)
-    #             if mid_title:
-    #                 title_parts.append(mid_title)
-    #             new_title = "__".join(title_parts)
-
-    #             # a_tagsの取得は一度に行い、ループ内で属性を取得する
-    #             a_tags = child_div.locator('a[href]').all()
-    #             if not a_tags:
-    #                 logger.warning(f"No links found in category '{mid_title or 'main'}' on page: {url}")
-    #                 continue
-
-    #             for a_tag in a_tags:
-    #                 # 要素が存在しなくなっている可能性に対処するため、個別にtry-exceptで囲む
-    #                 try:
-    #                     href = a_tag.get_attribute('href', timeout=10000)
-    #                     if not href:
-    #                         continue
-    #                 except Error as e:
-    #                     logger.warning(f"Could not get href from an element in '{new_title}'. It might have been detached. Error: {e}")
-    #                     continue
-
-    #                 modified_url = self._build_absolute_url_with_en(href)
-    #                 if not modified_url:
-    #                     continue
-
-    #                 if self.YOUTUBE_ANSWER_STRING in modified_url:
-    #                     logger.debug(f"Found Answer URL: {modified_url}")
-    #                     self.results.append({new_title: modified_url})
-    #                 elif self.YOUTUBE_TOPIC_STRING in modified_url:
-    #                     self.crawl_page(modified_url, new_title, depth + 1)
-    #                 else:
-    #                     logger.warning(f"URL is out of scope (not answer/topic): {modified_url}")
-
-    #     except Error as e:
-    #         logger.error(f"A Playwright error occurred on {page.url}: {e}")
-    #     except Exception as e:
-    #         logger.error(f"An unexpected error occurred on {page.url}: {e}")
-    #     finally:
-    #         page.close()
 
     def crawl_page(self, url: str, parent_title: str = "", depth: int = 0) -> None:
         if depth > self.MAX_RECURSION_DEPTH:
@@ -184,6 +91,7 @@ class Crawler:
             return
 
         for attempt in range(self.MAX_RETRIES):
+            # finally 節でもpage変数を使うので、ここで定義する必要がある
             page = None
             try:
                 page = self.context.new_page()
@@ -196,7 +104,7 @@ class Crawler:
 
                 # networkidle だと、Google Analyticsなどのツールや広告の更新やチャットウィジェットや通知などが
                 # 完全に終了した後、さらに0.5秒まつということになるので、失敗しやすい。そこで domcontentloaded にする。
-                # ブラウザからの domcontentloaded シグナルを self.timeout_ms内に取得できない場合にはリトライロジックが働く。
+                # ブラウザからの domcontentloaded シグナルを self.timeout_ms時間内に取得できない場合にはリトライロジックが働く。
                 page.goto(url, timeout=self.timeout_ms, wait_until="domcontentloaded")
 
                 # 以下はサーバーに負荷をかけすぎないように、リクエスト間に意図的に間隔を空けるための役割を果たすので、消してはいけない。
@@ -209,7 +117,8 @@ class Crawler:
                     logger.debug("'section.topic-container' is visible.")
                 except Error as e:
                     logger.warning(f"No 'section.topic-container' found on page: {url}. Assuming it's a leaf page. Error: {e}")
-                    break # domcontentloadedシグナルを受け取った後でのこのエラー。これは、ページ構造の問題なのでリトライせず終了
+                    # domcontentloadedシグナルを受け取った後のタイミングなので、ページ構造の問題ということで、リトライせず終了
+                    break
 
                 h1_text = self._safe_get_text(sections.locator('h1'))
                 if not h1_text:
@@ -313,30 +222,30 @@ def execute(interaction_dir) -> None:
             for url in seed_urls:
                 crawler.crawl_page(url)
 
-            if crawler.failed_links:
-                logger.warning("--- Summary of Failed URLs ---")
-                for failure in crawler.failed_links:
-                    logger.warning(f"  Parent: '{failure['parent_title']}' -> Failed URL: {failure['failed_url']}")
-                    logger.warning(f"    └─ Reason: {failure['last_error']}")
-                logger.warning("-----------------------------")
+        if crawler.failed_links:
+            logger.warning("--- Summary of Failed URLs ---")
+            for failure in crawler.failed_links:
+                logger.warning(f"  Parent: '{failure['parent_title']}' -> Failed URL: {failure['failed_url']}")
+                logger.warning(f"    └─ Reason: {failure['last_error']}")
+            logger.warning("-----------------------------")
 
 
-            all_articles = crawler.results
-            if not all_articles:
-                logger.warning("Crawling finished, but no articles were collected.")
-                return
+        all_articles = crawler.results
+        if not all_articles:
+            logger.warning("Crawling finished, but no articles were collected.")
+            return
 
-            logger.info(f"Preparing {len(all_articles)} discovered articles for CSV conversion...")
-            # データ形式を List[Dict] から List[List[str]] に変換する
-            rows_to_write = [[title, url] for article in all_articles for title, url in article.items()]
+        logger.info(f"Preparing {len(all_articles)} discovered articles for CSV conversion...")
+        # データ形式を List[Dict] から List[List[str]] に変換する
+        rows_to_write = [[title, url] for article in all_articles for title, url in article.items()]
 
-            logger.info("Converting articles to in-memory CSV buffer...")
-            output_io = convert_rows_to_in_memory_csv(rows_to_write)
-            logger.debug("In-memory CSV buffer created successfully.")
+        logger.info("Converting articles to in-memory CSV buffer...")
+        output_io = convert_rows_to_in_memory_csv(rows_to_write)
+        logger.debug("In-memory CSV buffer created successfully.")
 
-            logger.info(f"Saving articles to '{STEP2_OUTPUT_FILENAME}'...")
-            storage.save(output_io, STEP2_OUTPUT_FILENAME)
-            logger.info(f"Successfully saved {len(all_articles)} articles.")
+        logger.info(f"Saving articles to '{STEP2_OUTPUT_FILENAME}'...")
+        storage.save(output_io, STEP2_OUTPUT_FILENAME)
+        logger.info(f"Successfully saved {len(all_articles)} articles.")
 
     except FileNotFoundError:
         logger.critical(f"Input file '{STEP1_OUTPUT_FILENAME}' not found. Please run Step 1 first.")

@@ -60,7 +60,7 @@ class Scraper:
 
             logger.info("Expanding page content by clicking zippy containers...")
 
-            # 1. locatorオブジェクトを先に定義する
+            # 1. locatorオブジェクトを先に定義する。複数のCSSセレクタに一致する可能性のあるすべての要素を対象とするLocatorオブジェクトを作成
             clickable_elements_locator = page.locator("div.zippy-container > h2, div.zippy-container > a, div.zippy-container > h3")
 
             # 最初の要素が表示されるまで少し待つ（任意だが堅牢性が増す）
@@ -128,6 +128,7 @@ class Scraper:
         finally:
             context.close()
             logger.debug(f"Page and context for {url} closed.")
+
 
 def execute(interaction_dir) -> None:
     """Main execution function for step 4."""
