@@ -9,10 +9,6 @@ APP_ENV = os.environ.get('APP_ENV', 'development')
 
 OUTPUT_BASE_DIR = 'outputs'
 
-# You can add other configurations here later.
-GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'your-gcs-bucket-name')
-SQLITE_DB_FILENAME = "scraped_data.sqlite"
-
 # LOCAL_STORAGE_DIR = 'outputs'
 
 # Timeout for network requests in seconds.
@@ -24,8 +20,11 @@ TIMEOUT = int(os.environ.get('TIMEOUT', '30'))
 STEP1_OUTPUT_FILENAME = 'seed_urls_list.csv'
 STEP2_OUTPUT_FILENAME = 'raw_urls_list.csv'
 STEP3_OUTPUT_FILENAME = 'unique_urls_list.csv'
-
+GCS_BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'your-gcs-bucket-name') #STEP4
+SQLITE_DB_FILENAME = "scraped_data.sqlite" #STEP4
 STEP5_OUTPUT_FILENAME = 'chunks.json'
+
+
 # DATABASE_URL = "postgresql+psycopg2://postgres:your_password@localhost:5432/your_db"
 DATABASE_URL = os.environ.get("DATABASE_URL")
 

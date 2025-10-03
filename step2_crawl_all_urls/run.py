@@ -51,6 +51,7 @@ class Crawler:
         self.context = self.browser.new_context()
         logger.info("Crawler initialized: Playwright started, Browser launched.")
         # with ... as crawler: の crawler にこのインスタンス自身を返す
+        # pageについてはメソッドの中で作り、そこで一緒に header に Agent を設定する
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

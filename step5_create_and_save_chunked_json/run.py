@@ -12,18 +12,15 @@ import html2text
 import config
 from storage_strategies import get_storage_strategy, StorageError
 
-# --- Loggerの設定 ---
 import logging
 from config_logging import setup_logging
 logger = logging.getLogger(__name__)
 
-# --- 設定値の読み込み (config.pyから) ---
 APP_ENV = config.APP_ENV
 OUTPUT_BASE_DIR = config.OUTPUT_BASE_DIR
 STEP5_OUTPUT_FILENAME = config.STEP5_OUTPUT_FILENAME
 CHUNK_MIN_LENGTH = config.CHUNK_MIN_LENGTH
 CHUNK_MAX_LENGTH = config.CHUNK_MAX_LENGTH
-DATABASE_URL = config.DATABASE_URL
 
 
 def clean_up_html(html_content: str) -> str:

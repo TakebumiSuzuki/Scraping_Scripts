@@ -49,14 +49,67 @@ class Scraper:
             self.playwright.stop()
         logger.info("Browser closed and Playwright stopped.")
 
-    def scrape_html_content(self, url: str) -> str | None:
+    def _wait_for_element_count_stability(
+        self,
+        locator,
+        check_interval_ms: int = 200,
+        required_stable_checks: int = 3,
+        max_wait_ms: int = 3000
+    ) -> int:
+
+        previous_count = None
+        consecutive_stable_checks = 0
+        check_interval_sec = check_interval_ms / 1000
+        max_iterations = int(max_wait_ms / check_interval_ms)
+        iteration = 0
+
+        while consecutive_stable_checks < required_stable_checks and iteration < max_iterations:
+            current_count = locator.count()
+
+            if previous_count is not None and current_count == previous_count:
+                consecutive_stable_checks += 1
+                logger.debug(
+                    f"Element count stable: {current_count} "
+                    f"(check {consecutive_stable_checks}/{required_stable_checks})"
+                )
+            else:
+                consecutive_stable_checks = 0
+                logger.debug(f"Element count changed: {previous_count} -> {current_count}")
+
+            previous_count = current_count
+            iteration += 1
+
+            # まだ安定していない場合のみ待機
+            if consecutive_stable_checks < required_stable_checks:
+                time.sleep(check_interval_sec)
+
+        if iteration >= max_iterations:
+            logger.warning(
+                f"Element count did not stabilize within {max_wait_ms}ms. "
+                f"Last count: {previous_count}"
+            )
+        else:
+            logger.info(f"Element count stabilized at {previous_count}.")
+
+        return previous_count if previous_count is not None else 0
+
+
+    def scrape_html_content(self, url:str, attempt:int = 1) -> str | None:
         context = self.browser.new_context(user_agent=random.choice(self.user_agents))
         page = context.new_page()
+        logger.info('--------------------------------------------------------------')
         logger.info(f"Scraping page: {url}")
         try:
             # もし url からのレスポンスががリダイレクトを要求した場合には、リダイレクト先にアクセスした上で、
-            # ブラウザで domcontentloaded シグナルが発火されるのを動機的に待つ。
+            # ブラウザで domcontentloaded シグナルが発火されるのを同期的に待つ。とのことだが真偽は定かではない。
+            # 実験をしてみると、リダイレクトされたページは空白のようになっているようだ。
+            # この行の後で、Homeにリダイレクトされたときに即座にスクレイピングをスキップするロジックを入れようとしたが失敗した。
             page.goto(url, timeout=self.timeout_ms, wait_until="domcontentloaded")
+
+            sleep_time = random.uniform(1.5, 3) * attempt
+            logger.info(f"Waiting for {sleep_time:.2f} seconds...")
+            time.sleep(sleep_time)
+
 
             logger.info("Expanding page content by clicking zippy containers...")
 
@@ -72,28 +125,17 @@ class Scraper:
                 # このページにクリック対象がない場合は、そのまま後続処理へ
                 pass
 
-            count = clickable_elements_locator.count()
-            logger.info(f"Found {count} expandable elements.")
+            # 200msごとにポーリングをし、３回連続で変化がなかった場合には、読み込みが安定したと考え次の行へ進む。
+            stable_count = self._wait_for_element_count_stability(
+                    clickable_elements_locator,
+                    check_interval_ms=200,
+                    required_stable_checks=3,
+                    max_wait_ms=3000
+                )
+            logger.info(f"Found {stable_count} expandable elements.")
 
-
-            # ページ読み込み直後、待機せずにリダイレクトされたかを判定する。
-            # ヘルプトップページに特徴的な<h1 class="promoted-search__greeting">の存在をチェック。
-            redirect_indicator = page.locator("h1.promoted-search__greeting")
-
-            # .is_visible() はタイムアウトで待機せず、その瞬間の可視状態を即座に返す。
-            if redirect_indicator.is_visible():
-                logger.warning(f"URL was redirected to a main page. Skipping scrape for: {url}")
-                raise RedirectedURLSkipException() # 例外を発生させる
-
-            # 2. 次に、私のスクリプト環境で発生した「コンテンツ削除済み」ページをチェックする
-            no_content_indicator = page.locator("div.no-content-message")
-            if no_content_indicator.is_visible():
-                logger.warning(f"Content is no longer available. Skipping: {url}")
-                raise RedirectedURLSkipException()
-
-
-            # 2. count()で取得した要素数でループし、nth(i)で各要素にアクセス
-            for i in range(count):
+            # 2. cstable_count()で取得した要素数でループし、nth(i)で各要素にアクセス
+            for i in range(stable_count):
                 element = clickable_elements_locator.nth(i)
                 try:
                     # 1. まず要素が「見える」状態になるまで待つ
@@ -103,11 +145,12 @@ class Scraper:
                     expect(element).to_be_enabled(timeout=3000)
 
                     element.click()
-                    logger.debug(f"Clicked element {i+1}/{count}.")
+                    logger.debug(f"Clicked element {i+1}/{stable_count}.")
                     time.sleep(random.uniform(0.3, 0.7))
 
                 except Error as e:
                     logger.warning(f"Could not click an expandable element #{i+1} on {url}: {e}")
+
             article_container = page.locator(".article-container")
             try:
                 # .article-containerが画面に表示されるまで最大3秒待つ
@@ -116,9 +159,11 @@ class Scraper:
                 # タイムアウトした場合
                 logger.error(f"Target element '.article-container' not found or not visible on {url}.")
                 return None
+
             html_content = article_container.inner_html()
             logger.info(f"Successfully extracted HTML content from {url}.")
             return html_content
+
         except Error as e:
             logger.error(f"A Playwright error occurred while scraping {url}: {e}")
             return None
@@ -184,7 +229,7 @@ def execute(interaction_dir) -> None:
                         continue
 
                     try:
-                        html_content = scraper.scrape_html_content(url)
+                        html_content = scraper.scrape_html_content(url, attempt)
                         if not html_content:
                             raise ValueError("Scraping returned None, indicating a failure.")
 
@@ -203,10 +248,6 @@ def execute(interaction_dir) -> None:
                         logger.error(f"Failed on attempt {attempt} for URL {url}: {e}")
                         failures_in_this_attempt.append((category, url))
 
-                    # 待機時間。試行回数が増えるごとに少し長く待つようにする
-                    sleep_time = random.uniform(1.5, 3) * attempt
-                    logger.info(f"Waiting for {sleep_time:.2f} seconds...")
-                    time.sleep(sleep_time)
 
                 # 次のループのために、処理対象を今回の失敗リストに更新する
                 urls_to_process = failures_in_this_attempt
